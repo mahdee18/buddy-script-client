@@ -1,50 +1,97 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// Import assets
 import logo from '../../assets/images/logo.svg';
 import profilePic from '../../assets/images/profile.png';
+import notificationAvatar from '../../assets/images/friend-req.png';
 
-const SearchIcon = () => <svg className="absolute w-4 h-4 text-gray-400 left-3" xmlns="http://www.w3.org/2000/svg" width="17" height="17" fill="none" viewBox="0 0 17 17"><circle cx="7" cy="7" r="6" stroke="currentColor" /><path stroke="currentColor" strokeLinecap="round" d="M16 16l-3-3" /></svg>;
-const HomeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="21" fill="none" viewBox="0 0 18 21"><path stroke="#377DFF" strokeWidth="1.5" d="M1 9.924c0-1.552 0-2.328.314-3.01.313-.682.902-1.187 2.08-2.196l1.143-.98C6.667 1.913 7.732 1 9 1c1.268 0 2.333.913 4.463 2.738l1.142.98c1.179 1.01 1.768 1.514 2.081 2.196.314.682.314 1.458.314 3.01v4.846c0 2.155 0 3.233-.67 3.902-.669.67-1.746.67-3.901.67H5.57c-2.155 0-3.232 0-3.902-.67C1 18.002 1 16.925 1 14.77V9.924z" /><path stroke="#377DFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11.857 19.341v-5.857a1 1 0 00-1-1H7.143a1 1 0 00-1 1v5.857" /></svg>;
-// ... Add other SVG icons for notifications, friends, chat etc. as needed
+const NotificationDropdown = () => (
+    <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-lg shadow-xl overflow-hidden">
+        <div className="p-4 border-b">
+            <h4 className="text-lg font-semibold text-gray-800">Notifications</h4>
+        </div>
+        <div className="p-2 border-b">
+            <button className="px-4 py-1 text-sm font-semibold text-white bg-blue-600 rounded-full">All</button>
+            <button className="px-4 py-1 ml-2 text-sm font-semibold text-gray-600 bg-gray-200 rounded-full">Unread</button>
+        </div>
+        <div className="max-h-80 overflow-y-auto">
+            {/* Notification Item */}
+            <div className="flex items-start p-4 space-x-3 transition hover:bg-gray-50">
+                <img src={notificationAvatar} alt="Steve Jobs" className="w-10 h-10 rounded-full" />
+                <div className="flex-1">
+                    <p className="text-sm text-gray-700">
+                        <span className="font-bold">Steve Jobs</span> posted a link in your timeline.
+                    </p>
+                    <span className="text-xs text-blue-500">42 minutes ago</span>
+                </div>
+            </div>
+            <div className="flex items-start p-4 space-x-3 transition hover:bg-gray-50">
+                <img src={notificationAvatar} alt="Steve Jobs" className="w-10 h-10 rounded-full" />
+                <div className="flex-1">
+                    <p className="text-sm text-gray-700">
+                        <span className="font-bold">Steve Jobs</span> posted a link in your timeline.
+                    </p>
+                    <span className="text-xs text-blue-500">42 minutes ago</span>
+                </div>
+            </div>
+            <div className="flex items-start p-4 space-x-3 transition hover:bg-gray-50">
+                <img src={notificationAvatar} alt="Steve Jobs" className="w-10 h-10 rounded-full" />
+                <div className="flex-1">
+                    <p className="text-sm text-gray-700">
+                        <span className="font-bold">Steve Jobs</span> posted a link in your timeline.
+                    </p>
+                    <span className="text-xs text-blue-500">42 minutes ago</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+);
+
 
 const Navbar = () => {
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
     return (
-        <nav className="sticky top-0 z-50 py-2 bg-white shadow-sm">
-            <div className="container px-4 mx-auto">
-                <div className="flex items-center justify-between">
-                    {/* Logo and Search */}
-                    <div className="flex items-center space-x-8">
-                        <Link to="/feed">
-                            <img src={logo} alt="Buddy Script" className="h-8" />
-                        </Link>
-                        <div className="relative hidden md:block">
-                            <SearchIcon />
-                            <input
-                                type="search"
-                                placeholder="input search text"
-                                className="w-full py-2 pl-10 pr-4 text-sm bg-gray-100 border border-transparent rounded-lg focus:outline-none focus:bg-white focus:border-gray-300"
-                            />
+        <header className="sticky top-0 z-40 bg-white shadow-sm">
+            {/* Desktop Navbar */}
+            <nav className="hidden py-2 lg:block">
+                <div className="container px-4 mx-auto">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-8">
+                            <Link to="/feed"><img src={logo} alt="Buddy Script" className="h-8" /></Link>
+                            <div className="relative">
+                                <input type="search" placeholder="input search text" className="w-full py-2 pl-10 pr-4 text-sm bg-gray-100 border-gray-200 rounded-lg focus:outline-none focus:bg-white focus:border-gray-300" />
+                                <svg className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 top-1/2 left-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 17"><circle cx="7" cy="7" r="6" stroke="currentColor" /><path stroke="currentColor" strokeLinecap="round" d="M16 16l-3-3" /></svg>
+                            </div>
                         </div>
-                    </div>
-
-                    {/* Nav Icons and Profile */}
-                    <div className="flex items-center space-x-6">
-                        <ul className="items-center hidden space-x-6 md:flex">
-                            <li><Link to="/feed" className="text-blue-500"><HomeIcon /></Link></li>
-                            {/* Add other icons here */}
-                        </ul>
-
-                        {/* Profile Dropdown */}
-                        <div className="flex items-center space-x-2">
-                            <img src={profilePic} alt="Dylan Field" className="w-10 h-10 rounded-full" />
-                            <div className="hidden text-sm font-semibold text-gray-700 lg:block">Dylan Field</div>
+                        <div className="flex items-center space-x-6">
+                            <ul className="flex items-center space-x-6">
+                                {/* Nav Icons */}
+                            </ul>
+                            <div className="relative">
+                                <button onClick={() => setIsNotificationOpen(!isNotificationOpen)} className="relative">
+                                    <svg className="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 22"><path d="M7.547 19.55c.533.59 1.218.915 1.93.915.714 0 1.403-.324 1.938-.916a.777.777 0 011.09-.056c.318.284.344.77.058 1.084-.832.917-1.927 1.423-3.086 1.423h-.002c-1.155-.001-2.248-.506-3.077-1.424a.762.762 0 01.057-1.083.774.774 0 011.092.057zM9.527 0c4.58 0 7.657 3.543 7.657 6.85 0 1.702.436 2.424.899 3.19.457.754.976 1.612.976 3.233-.36 4.14-4.713 4.478-9.531 4.478-4.818 0-9.172-.337-9.528-4.413-.003-1.686.515-2.544.973-3.299l.161-.27c.398-.679.737-1.417.737-2.918C1.871 3.543 4.948 0 9.528 0zm0 1.535c-3.6 0-6.11 2.802-6.11 5.316 0 2.127-.595 3.11-1.12 3.978-.422.697-.755 1.247-.755 2.444.173 1.93 1.455 2.944 7.986 2.944 6.494 0 7.817-1.06 7.988-3.01-.003-1.13-.336-1.681-.757-2.378-.526-.868-1.12-1.851-1.12-3.978 0-2.514-2.51-5.316-6.111-5.316z" clipRule="evenodd"></path></svg>
+                                    <span className="absolute top-0 right-0 flex items-center justify-center w-4 h-4 text-xs text-white bg-red-500 rounded-full">6</span>
+                                </button>
+                                {isNotificationOpen && <NotificationDropdown />}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <img src={profilePic} alt="Dylan Field" className="w-10 h-10 rounded-full" />
+                                <div className="text-sm font-semibold text-gray-700">Dylan Field</div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </nav>
+            {/* Mobile Top Nav */}
+            <div className="flex items-center justify-between p-4 lg:hidden">
+                <Link to="/feed"><img src={logo} alt="Buddy Script" className="h-7" /></Link>
+                <button className="p-2 text-gray-600">
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 17 17"><circle cx="7" cy="7" r="6" strokeWidth="2"></circle><path strokeLinecap="round" strokeWidth="2" d="M16 16l-3-3"></path></svg>
+                </button>
             </div>
-        </nav>
+        </header>
     );
 };
 

@@ -11,7 +11,7 @@ const Feed = () => {
       {/* Navbar at the top */}
       <Navbar/>
 
-      {/* Main content area with padding */}
+      {/* Main content */}
       <main className="container px-4 py-6 mx-auto">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
 
