@@ -1,17 +1,29 @@
-
-import axiosInstance from "./axiosInstance";
+import axiosInstance from './axiosInstance';
 
 export const registerUser = async (userData) => {
-  const response = await axiosInstance.post('/auth/register', userData);
-  return response.data;
+  try {
+    const { data } = await axiosInstance.post('/users/register', userData);
+    return data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const loginUser = async (credentials) => {
-  const response = await axiosInstance.post('/auth/login', credentials);
-  return response.data;
+  try {
+    console.log("4. loginUser in api/auth.js called. Making Axios call now...");
+    const { data } = await axiosInstance.post('/users/login', credentials);
+    return data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getMe = async () => {
-    const response = await axiosInstance.get('/auth/me');
-    return response.data;
-}
+    try {
+        const { data } = await axiosInstance.get('/users/me');
+        return data;
+    } catch (error) {
+        throw error;
+    }
+};

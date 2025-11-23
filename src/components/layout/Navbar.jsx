@@ -7,17 +7,17 @@ import notificationAvatar from '../../assets/images/friend-req.png';
 const NotificationDropdown = () => (
     <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-lg shadow-xl overflow-hidden border border-gray-700">
         <div className="p-4 border-b border-gray-700">
-            <h4 className="text-lg font-semibold text-gray-800 text-gray-200">Notifications</h4>
+            <h4 className="text-lg font-semibold text-gray-800 ">Notifications</h4>
         </div>
         <div className="p-2 border-b border-gray-700">
             <button className="px-4 py-1 text-sm font-semibold text-white bg-blue-600 rounded-full">All</button>
-            <button className="px-4 py-1 ml-2 text-sm font-semibold text-gray-600 bg-gray-200 bg-gray-700  rounded-full">Unread</button>
+            <button className="px-4 py-1 ml-2 text-sm font-semibold text-gray-600 bg-gray-200   rounded-full">Unread</button>
         </div>
         <div className="max-h-80 overflow-y-auto">
-            <div className="flex items-start p-4 space-x-3 transition hover:bg-gray-50 hover:bg-gray-700">
+            <div className="flex items-start p-4 space-x-3 transition hover:bg-gray-50 ">
                 <img src={notificationAvatar} alt="Steve Jobs" className="w-10 h-10 rounded-full" />
                 <div>
-                    <p className="text-sm text-gray-700 "><strong className="font-bold text-gray-900 text-white">Steve Jobs</strong> posted a link.</p>
+                    <p className="text-sm text-gray-700 "><strong className="font-bold text-gray-900">Steve Jobs</strong> posted a link.</p>
                     <span className="text-xs text-blue-500">42 minutes ago</span>
                 </div>
             </div>
@@ -49,7 +49,7 @@ const Navbar = () => {
                             </div>
                             <div className="flex items-center space-x-2">
                                 <img src={profilePic} alt="Dylan Field" className="w-10 h-10 rounded-full" />
-                                <div className="hidden text-sm font-semibold text-gray-700 text-gray-200 lg:block">Dylan Field</div>
+                                <div className="hidden text-sm font-semibold text-gray-700  lg:block">Dylan Field</div>
                             </div>
                         </div>
                     </div>
