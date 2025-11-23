@@ -1,3 +1,5 @@
+import React from 'react';
+
 const Comment = ({ comment }) => {
     return (
         <div className="flex items-start mt-4 space-x-3">

@@ -43,19 +43,18 @@ const EventCard = ({ day, month, title, attendees }) => (
 
 const LeftSidebar = () => {
     return (
-        // Hide on screens smaller than 'lg'
-        <div className="hidden space-y-6 lg:block">
+        <div className="space-y-6">
             <div className="p-6 bg-white rounded-lg shadow">
                 <h4 className="mb-4 text-lg font-semibold text-gray-800">Explore</h4>
                 <ul>
-                    <SidebarLink isNew><span>{/* SVG */}</span><span>Learning</span></SidebarLink>
-                    <SidebarLink><span>{/* SVG */}</span><span>Insights</span></SidebarLink>
-                    <SidebarLink><span>{/* SVG */}</span><span>Find friends</span></SidebarLink>
-                    <SidebarLink><span>{/* SVG */}</span><span>Bookmarks</span></SidebarLink>
-                    <SidebarLink><span>{/* SVG */}</span><span>Group</span></SidebarLink>
-                    <SidebarLink isNew><span>{/* SVG */}</span><span>Gaming</span></SidebarLink>
-                    <SidebarLink><span>{/* SVG */}</span><span>Settings</span></SidebarLink>
-                    <SidebarLink><span>{/* SVG */}</span><span>Save post</span></SidebarLink>
+                    <SidebarLink isNew><span>{/* SVG Icon */}</span><span>Learning</span></SidebarLink>
+                    <SidebarLink><span>{/* SVG Icon */}</span><span>Insights</span></SidebarLink>
+                    <SidebarLink><span>{/* SVG Icon */}</span><span>Find friends</span></SidebarLink>
+                    <SidebarLink><span>{/* SVG Icon */}</span><span>Bookmarks</span></SidebarLink>
+                    <SidebarLink><span>{/* SVG Icon */}</span><span>Group</span></SidebarLink>
+                    <SidebarLink isNew><span>{/* SVG Icon */}</span><span>Gaming</span></SidebarLink>
+                    <SidebarLink><span>{/* SVG Icon */}</span><span>Settings</span></SidebarLink>
+                    <SidebarLink><span>{/* SVG Icon */}</span><span>Save post</span></SidebarLink>
                 </ul>
             </div>
 
