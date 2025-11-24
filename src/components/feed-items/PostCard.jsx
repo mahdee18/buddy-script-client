@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { likePost, addComment, likeComment, addReply, likeReply, getLikers, deletePost } from '../../api/posts';
 import ClipLoader from "react-spinners/ClipLoader";
 import { BsBookmark, BsBell, BsEyeSlash, BsPencil, BsTrash, BsThreeDots } from 'react-icons/bs';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 // ===================================================================
 // SUB-COMPONENT 1: LIKERS MODAL
@@ -34,9 +35,7 @@ const LikersModal = ({ isOpen, onClose, fetchLikers }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm" onClick={onClose}>
             <div className="bg-white rounded-lg w-full max-w-sm p-6 shadow-xl" onClick={e => e.stopPropagation()}>
                 <h3 className="text-lg font-bold mb-4">Liked by</h3>
-                {loading ? (
-                    <div className="flex justify-center"><ClipLoader size={30} /></div>
-                ) : (
+                {loading ? <div className="flex justify-center"><ClipLoader size={30} /></div> : (
                     <ul className="space-y-3 max-h-80 overflow-y-auto">
                         {likers.length > 0 ? likers.map(liker => (
                             <li key={liker._id} className="flex items-center space-x-3">
@@ -52,41 +51,57 @@ const LikersModal = ({ isOpen, onClose, fetchLikers }) => {
 };
 
 // ===================================================================
-// SUB-COMPONENT 2: POST OPTIONS MENU
+// SUB-COMPONENT 2: POST OPTIONS MENU (with SweetAlert2)
 // ===================================================================
 const PostOptionsMenu = ({ post, user, token, menuRef, onClose, onPostDeleted }) => {
     const isAuthor = post.author._id === user?._id;
 
-    const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this post?')) {
-            try {
-                await deletePost(post._id, token);
-                onPostDeleted(post._id);
-                onClose();
-            } catch (error) {
-                console.error("Failed to delete post:", error);
-                alert("Could not delete the post. Please try again.");
+    const handleDelete = () => {
+        onClose(); // Close the dropdown menu first
+        
+        // Use SweetAlert2 for a better confirmation dialog
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await deletePost(post._id, token);
+                    // Show a success message
+                    Swal.fire(
+                        'Deleted!',
+                        'Your post has been deleted.',
+                        'success'
+                    );
+                    // Update the feed
+                    onPostDeleted(post._id);
+                } catch (error) {
+                    console.error("Failed to delete post:", error);
+                    // Show an error message
+                    Swal.fire(
+                        'Failed!',
+                        'Could not delete the post. Please try again.',
+                        'error'
+                    );
+                }
             }
-        }
+        });
     };
 
     const MenuItem = ({ icon, text, onClick, isDestructive = false }) => (
-        <button
-            onClick={onClick}
-            className={`flex items-center w-full gap-3 px-4 py-2 text-left text-sm transition-colors duration-150 ${
-                isDestructive ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-100'
-            }`}
-        >
+        <button onClick={onClick} className={`flex items-center w-full gap-3 px-4 py-2 text-left text-sm transition-colors duration-150 ${ isDestructive ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-100' }`}>
             <span className="p-2 bg-gray-100 rounded-full">{icon}</span>
             <span className="font-semibold">{text}</span>
         </button>
     );
 
     return (
-        <div
-            ref={menuRef}
-            className="absolute right-0 z-20 w-64 mt-2 origin-top-right bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 py-2"
-        >
+        <div ref={menuRef} className="absolute right-0 z-20 w-64 mt-2 origin-top-right bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 py-2">
             <MenuItem icon={<BsBookmark size={16} />} text="Save Post" />
             <MenuItem icon={<BsBell size={16} />} text="Turn On Notification" />
             <MenuItem icon={<BsEyeSlash size={16} />} text="Hide" />
