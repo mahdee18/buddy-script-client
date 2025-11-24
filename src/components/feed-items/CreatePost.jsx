@@ -3,8 +3,11 @@ import { useAuth } from '../../hooks/useAuth';
 import { createPost } from '../../api/posts';
 import ClipLoader from "react-spinners/ClipLoader";
 import axios from 'axios';
+import { BsCardImage, BsCameraVideo, BsCalendar2Event, BsNewspaper } from 'react-icons/bs';
+import { FiSend } from 'react-icons/fi';
+import { IoClose } from 'react-icons/io5';
 
-const CreatePost = ({ onPostCreated }) => {
+const CreatePostModalForm = ({ onPostCreated, onClose }) => {
     const { user, token } = useAuth();
     const [content, setContent] = useState('');
     const [imageFile, setImageFile] = useState(null);
@@ -36,20 +39,10 @@ const CreatePost = ({ onPostCreated }) => {
             setError('Please write something or upload an image.');
             return;
         }
-        if (!imgbbApiKey) {
-            setError('ImgBB API Key is not configured. Please check your .env file.');
-            return;
-        }
-        if (!token) {
-            setError('You must be logged in to post.');
-            return;
-        }
-
         setLoading(true);
         setError('');
-        let hostedImageUrl = '';
-
         try {
+            let hostedImageUrl = '';
             if (imageFile) {
                 const formData = new FormData();
                 formData.append('image', imageFile);
@@ -57,65 +50,121 @@ const CreatePost = ({ onPostCreated }) => {
                 if (response.data.success) {
                     hostedImageUrl = response.data.data.url;
                 } else {
-                    throw new Error('Image upload to hosting service failed.');
+                    throw new Error('Image upload failed.');
                 }
             }
-
             const postData = { content, imageUrl: hostedImageUrl };
             const newPost = await createPost(postData, token);
-
-            setContent('');
-            handleRemoveImage();
             if (onPostCreated) {
                 onPostCreated(newPost);
             }
-
         } catch (err) {
-            console.error(err);
             const serverErrorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred.';
             setError(`Failed to create post. ${serverErrorMessage}`);
         } finally {
-            // This is the critical fix: always stop loading
             setLoading(false);
         }
     };
 
+    const ActionButton = ({ icon, text, onClick, isFunctional = false }) => (
+        <button 
+            type="button" 
+            onClick={onClick} 
+            disabled={!isFunctional}
+            className={`flex items-center gap-2 px-2 py-1 rounded-md transition text-gray-600 ${isFunctional ? 'hover:bg-gray-100 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+            title={!isFunctional ? 'Feature not available' : ''}
+        >
+            {icon}
+            <span className="font-semibold text-sm">{text}</span>
+        </button>
+    );
+
     return (
-        <div className="p-4 sm:p-6 mb-6 bg-white rounded-lg shadow">
-            <div className="flex items-start space-x-4">
-                <img src={user?.profilePicture || "/src/assets/images/profile.png"} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
-                <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="w-full p-3 text-gray-700 bg-gray-100 border-transparent rounded-lg focus:outline-none focus:bg-white focus:border-blue-500"
-                    rows="2"
-                    placeholder={`What's on your mind, ${user?.firstName || ''}?`}
-                ></textarea>
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+            <div className="flex justify-between items-center p-4 border-b">
+                <h3 className="text-xl font-bold text-gray-800">Create Post</h3>
+                <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100" aria-label="Close">
+                     <IoClose className="h-6 w-6 text-gray-600" />
+                </button>
             </div>
             
-            {imagePreview && (
-                <div className="relative mt-4">
-                    <img src={imagePreview} alt="Post preview" className="w-full rounded-lg max-h-96 object-contain bg-gray-100" />
-                    <button onClick={handleRemoveImage} className="absolute top-2 right-2 bg-gray-800 bg-opacity-60 text-white rounded-full p-1.5 hover:bg-opacity-80 transition-colors" aria-label="Remove image">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
+            <div className="p-4">
+                <div className="flex items-start space-x-3">
+                    <img src={user?.profilePicture || "/src/assets/images/profile.png"} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
+                    <textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        className="w-full p-2 text-gray-700 bg-transparent rounded-lg focus:outline-none text-base resize-y"
+                        rows="5"
+                        placeholder={`Write something...`}
+                    />
                 </div>
-            )}
+                
+                {imagePreview && (
+                    <div className="relative mt-4 border rounded-lg p-2">
+                        <img src={imagePreview} alt="Post preview" className="w-full rounded-lg max-h-72 object-contain" />
+                        <button onClick={handleRemoveImage} className="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1.5 hover:bg-opacity-70" aria-label="Remove image">
+                           <IoClose className="h-5 w-5" />
+                        </button>
+                    </div>
+                )}
 
-            {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
+                {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
+            </div>
 
-            <hr className="my-4" />
-
-            <div className="flex flex-col sm:flex-row items-center justify-between mt-2">
-                <div className="flex space-x-4 text-gray-600">
+            <div className="flex items-center justify-between p-4 border-t">
+                <div className="flex items-center space-x-2">
                     <input type="file" accept="image/*" ref={imageInputRef} onChange={handleImageChange} className="hidden" />
-                    <button onClick={() => imageInputRef.current.click()} className="flex items-center gap-2 transition hover:text-blue-600">📷 Photo</button>
+                    <ActionButton icon={<BsCardImage size={20} className="text-green-500"/>} text="Photo" onClick={() => imageInputRef.current.click()} isFunctional={true} />
+                    <ActionButton icon={<BsCameraVideo size={20} className="text-red-500"/>} text="Video" />
+                    <ActionButton icon={<BsCalendar2Event size={20} className="text-orange-500"/>} text="Event" />
+                    <ActionButton icon={<BsNewspaper size={20} className="text-purple-500"/>} text="Article" />
                 </div>
-                <button onClick={handleSubmit} disabled={loading} className="w-full sm:w-auto mt-4 sm:mt-0 px-6 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors">
+
+                <button onClick={handleSubmit} disabled={loading || (!content && !imageFile)} className="flex items-center gap-2 px-5 py-2 font-bold text-white bg-blue-500 rounded-full hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors">
+                    <FiSend size={16} />
                     {loading ? <ClipLoader color="#ffffff" size={20} /> : 'Post'}
                 </button>
             </div>
         </div>
+    );
+};
+
+const CreatePost = ({ onPostCreated }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const { user } = useAuth();
+
+    const handlePostCreation = (newPost) => {
+        if (onPostCreated) {
+            onPostCreated(newPost);
+        }
+        setIsOpen(false);
+    };
+
+    return (
+        <>
+            {/* This is the trigger that is always visible on the feed */}
+            <div className="p-4 mb-6 bg-white rounded-lg shadow">
+                <div className="flex items-center space-x-3">
+                    <img src={user?.profilePicture || "/src/assets/images/profile.png"} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
+                    <button onClick={() => setIsOpen(true)} className="w-full p-3 text-left text-gray-500 bg-gray-100 rounded-full hover:bg-gray-200 transition">
+                        Write something...
+                    </button>
+                </div>
+            </div>
+
+            {/* This is the modal that opens when the trigger is clicked */}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/30 bg-opacity-50 backdrop-blur-sm"
+                    onClick={() => setIsOpen(false)}
+                >
+                    <div onClick={e => e.stopPropagation()}>
+                        <CreatePostModalForm onPostCreated={handlePostCreation} onClose={() => setIsOpen(false)} />
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
