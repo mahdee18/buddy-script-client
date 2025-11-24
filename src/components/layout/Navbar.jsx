@@ -1,65 +1,174 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import logo from '../../assets/images/logo.svg';
-import profilePic from '../../assets/images/profile.png';
 import notificationAvatar from '../../assets/images/friend-req.png';
 
-const NotificationDropdown = () => (
-    <div className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-lg shadow-xl overflow-hidden border border-gray-700">
-        <div className="p-4 border-b border-gray-700">
-            <h4 className="text-lg font-semibold text-gray-800 ">Notifications</h4>
+// Import icons from react-icons
+import { HiOutlineHome, HiOutlineUsers, HiOutlineBell, HiOutlineChatBubbleOvalLeft } from "react-icons/hi2";
+import { FiChevronDown, FiChevronRight, FiSettings, FiHelpCircle, FiLogOut } from "react-icons/fi";
+import { IoSearchOutline } from "react-icons/io5";
+
+// ===================================================================
+// SUB-COMPONENT 1: Profile Dropdown Menu
+// ===================================================================
+const ProfileDropdown = ({ user, menuRef }) => {
+    const { logOut } = useAuth();
+
+    const MenuItem = ({ icon, text, hasArrow = true, onClick }) => (
+        <button onClick={onClick} className="flex items-center justify-between w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+            <div className="flex items-center gap-3">
+                <span className="p-2 bg-gray-100 rounded-full">{icon}</span>
+                <span className="font-semibold">{text}</span>
+            </div>
+            {hasArrow && <FiChevronRight className="w-5 h-5 text-gray-400" />}
+        </button>
+    );
+
+    return (
+        <div
+            ref={menuRef}
+            className="absolute right-0 z-20 w-72 mt-2 origin-top-right bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5"
+        >
+            <div className="p-4 border-b">
+                <div className="flex items-center space-x-3">
+                    <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
+                    <div>
+                        <h4 className="font-bold text-gray-800">{user?.firstName} {user?.lastName}</h4>
+                        <Link to="/profile" className="text-sm text-blue-600 hover:underline">View Profile</Link>
+                    </div>
+                </div>
+            </div>
+            <div className="py-2">
+                <MenuItem icon={<FiSettings size={20} />} text="Settings" />
+                <MenuItem icon={<FiHelpCircle size={20} />} text="Help & Support" />
+                <MenuItem icon={<FiLogOut size={20} />} text="Log Out" onClick={logOut} />
+            </div>
         </div>
-        <div className="p-2 border-b border-gray-700">
+    );
+};
+
+// ===================================================================
+// SUB-COMPONENT 2: Notification Dropdown (Complete and Functional)
+// ===================================================================
+const NotificationDropdown = ({ menuRef }) => (
+    <div ref={menuRef} className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-lg shadow-xl overflow-hidden border">
+        <div className="p-4 border-b">
+            <h4 className="text-lg font-semibold text-gray-800">Notifications</h4>
+        </div>
+        <div className="p-2 border-b bg-gray-50">
             <button className="px-4 py-1 text-sm font-semibold text-white bg-blue-600 rounded-full">All</button>
-            <button className="px-4 py-1 ml-2 text-sm font-semibold text-gray-600 bg-gray-200   rounded-full">Unread</button>
+            <button className="px-4 py-1 ml-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-full">Unread</button>
         </div>
         <div className="max-h-80 overflow-y-auto">
-            <div className="flex items-start p-4 space-x-3 transition hover:bg-gray-50 ">
-                <img src={notificationAvatar} alt="Steve Jobs" className="w-10 h-10 rounded-full" />
+            <div className="flex items-start p-4 space-x-3 transition hover:bg-gray-100">
+                <img src={notificationAvatar} alt="Notification avatar" className="w-10 h-10 rounded-full" />
                 <div>
-                    <p className="text-sm text-gray-700 "><strong className="font-bold text-gray-900">Steve Jobs</strong> posted a link.</p>
+                    <p className="text-sm text-gray-700"><strong className="font-bold text-gray-900">Steve Jobs</strong> posted a new photo.</p>
                     <span className="text-xs text-blue-500">42 minutes ago</span>
+                </div>
+            </div>
+             <div className="flex items-start p-4 space-x-3 transition hover:bg-gray-100">
+                <img src={notificationAvatar} alt="Notification avatar" className="w-10 h-10 rounded-full" />
+                <div>
+                    <p className="text-sm text-gray-700"><strong className="font-bold text-gray-900">Elon Musk</strong> commented on your post.</p>
+                    <span className="text-xs text-blue-500">1 hour ago</span>
                 </div>
             </div>
         </div>
     </div>
 );
 
+// ===================================================================
+// MAIN NAVBAR COMPONENT
+// ===================================================================
 const Navbar = () => {
+    const { user } = useAuth();
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+    
+    const profileMenuRef = useRef(null);
+    const notificationMenuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Close Profile Menu
+            const profileButton = event.target.closest('[data-menu-button="profile"]');
+            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target) && !profileButton) {
+                setIsProfileOpen(false);
+            }
+            // Close Notification Menu
+            const notificationButton = event.target.closest('[data-menu-button="notification"]');
+            if (notificationMenuRef.current && !notificationMenuRef.current.contains(event.target) && !notificationButton) {
+                setIsNotificationOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const NavIconButton = ({ icon, badgeCount, onClick, menuButtonId }) => (
+        <button onClick={onClick} data-menu-button={menuButtonId} className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
+            {icon}
+            {badgeCount > 0 && (
+                 <span className="absolute top-0 right-0 flex items-center justify-center w-4 h-4 text-xs font-bold text-white bg-blue-600 rounded-full">
+                    {badgeCount}
+                </span>
+            )}
+        </button>
+    );
+
     return (
-        <header className="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-700">
+        <header className="sticky top-0 z-40 bg-white shadow-sm">
             <nav className="hidden py-2 lg:block">
                 <div className="container px-4 mx-auto">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-8">
-                            <Link to="/feed"><img src={logo} alt="Buddy Script" className="h-8" /></Link>
+                            <Link to="/feed">
+                                <img src={logo} alt="Buddy Script" className="h-8" />
+                            </Link>
                             <div className="relative">
-                                <input type="search" placeholder="Search..." className="w-full py-2 pl-10 pr-4 text-sm bg-gray-100 border-transparent rounded-lg text-gray-800 focus:outline-none focus:bg-gray-200" />
-                                <svg className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 top-1/2 left-3" fill="none" viewBox="0 0 17 17"><circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="2"/><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M16 16l-4-4" /></svg>
+                                <IoSearchOutline className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 top-1/2 left-3" />
+                                <input type="search" placeholder="input search text" className="w-full py-2 pl-10 pr-4 text-sm bg-gray-100 border-transparent rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             </div>
                         </div>
-                        <div className="flex items-center space-x-6">
-                            <div className="relative">
-                                <button onMouseEnter={() => setIsNotificationOpen(true)} onMouseLeave={() => setIsNotificationOpen(false)} className="relative p-2 rounded-full hover:bg-gray-100 hover:bg-gray-700">
-                                    <svg className="w-6 h-6 text-gray-600 " fill="currentColor" viewBox="0 0 20 22"><path d="M7.547 19.55c.533.59 1.218.915 1.93.915.714 0 1.403-.324 1.938-.916a.777.777 0 011.09-.056c.318.284.344.77.058 1.084-.832.917-1.927 1.423-3.086 1.423h-.002c-1.155-.001-2.248-.506-3.077-1.424a.762.762 0 01.057-1.083.774.774 0 011.092.057zM9.527 0c4.58 0 7.657 3.543 7.657 6.85 0 1.702.436 2.424.899 3.19.457.754.976 1.612.976 3.233-.36 4.14-4.713 4.478-9.531 4.478-4.818 0-9.172-.337-9.528-4.413-.003-1.686.515-2.544.973-3.299l.161-.27c.398-.679.737-1.417.737-2.918C1.871 3.543 4.948 0 9.528 0zm0 1.535c-3.6 0-6.11 2.802-6.11 5.316 0 2.127-.595 3.11-1.12 3.978-.422.697-.755 1.247-.755 2.444.173 1.93 1.455 2.944 7.986 2.944 6.494 0 7.817-1.06 7.988-3.01-.003-1.13-.336-1.681-.757-2.378-.526-.868-1.12-1.851-1.12-3.978 0-2.514-2.51-5.316-6.111-5.316z" clipRule="evenodd"></path></svg>
-                                    <span className="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-xs text-white bg-red-500 rounded-full">6</span>
-                                    {isNotificationOpen && <NotificationDropdown />}
-                                </button>
-                            </div>
+
+                        <div className="flex items-center space-x-2">
+                            <Link to="/feed" className="p-3 rounded-md text-blue-600 bg-blue-50 border-b-2 border-blue-600">
+                                <HiOutlineHome size={24} />
+                            </Link>
+                            <Link to="#" className="p-3 rounded-md text-gray-600 hover:bg-gray-100">
+                                <HiOutlineUsers size={24} />
+                            </Link>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
-                                <img src={profilePic} alt="Dylan Field" className="w-10 h-10 rounded-full" />
-                                <div className="hidden text-sm font-semibold text-gray-700  lg:block">Dylan Field</div>
+                                <div className="relative">
+                                    <NavIconButton icon={<HiOutlineBell size={24} />} badgeCount={6} onClick={() => setIsNotificationOpen(!isNotificationOpen)} menuButtonId="notification" />
+                                    {isNotificationOpen && <NotificationDropdown menuRef={notificationMenuRef} />}
+                                </div>
+                                <NavIconButton icon={<HiOutlineChatBubbleOvalLeft size={24} />} badgeCount={2} />
+                            </div>
+                            
+                            <div className="relative">
+                                <button onClick={() => setIsProfileOpen(!isProfileOpen)} data-menu-button="profile" className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                                    <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-9 h-9 rounded-full object-cover" />
+                                    <div className="hidden text-sm font-semibold text-gray-700 lg:block">{user?.firstName} {user?.lastName}</div>
+                                    <FiChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                </button>
+                                {isProfileOpen && <ProfileDropdown user={user} menuRef={profileMenuRef} />}
                             </div>
                         </div>
                     </div>
                 </div>
             </nav>
+
             <div className="flex items-center justify-between p-4 lg:hidden">
                 <Link to="/feed"><img src={logo} alt="Buddy Script" className="h-7" /></Link>
-                <button className="p-2 text-gray-600 "><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
             </div>
         </header>
     );
 };
+
 export default Navbar;

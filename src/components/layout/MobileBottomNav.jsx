@@ -1,26 +1,104 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
-const MobileBottomNav = () => {
+// Import the icons we will use
+import { HiOutlineHome, HiOutlineUsers, HiOutlineBell, HiOutlineChatBubbleOvalLeft, HiOutlineBars3 } from "react-icons/hi2";
+import { FiSettings, FiHelpCircle, FiLogOut, FiChevronRight } from "react-icons/fi";
+
+// ===================================================================
+// SUB-COMPONENT: The new profile dropdown menu for mobile
+// ===================================================================
+const MobileProfileMenu = ({ user, menuRef, onClose }) => {
+    const { logOut } = useAuth();
+
+    const MenuItem = ({ icon, text, onClick }) => (
+        <button onClick={onClick} className="flex items-center justify-between w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+            <div className="flex items-center gap-3">
+                <span className="p-2 bg-gray-100 rounded-full">{icon}</span>
+                <span className="font-semibold">{text}</span>
+            </div>
+            <FiChevronRight className="w-5 h-5 text-gray-400" />
+        </button>
+    );
+
     return (
-        <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 lg:hidden">
-            <div className="grid h-full max-w-lg grid-cols-5 mx-auto font-medium">
-                <a href="#" className="inline-flex flex-col items-center justify-center px-5 text-blue-600 hover:bg-gray-50  group">
-                    <svg className="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
-                </a>
-                <a href="#" className="inline-flex flex-col items-center justify-center px-5 text-gray-500 hover:bg-gray-50   group">
-                    <svg className="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path></svg>
-                </a>
-                <a href="#" className="inline-flex flex-col items-center justify-center px-5 text-gray-500 hover:bg-gray-50   group">
-                    <svg className="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path></svg>
-                </a>
-                <a href="#" className="inline-flex flex-col items-center justify-center px-5 text-gray-500 hover:bg-gray-50  group">
-                    <svg className="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"></path></svg>
-                </a>
-                <a href="#" className="inline-flex flex-col items-center justify-center px-5 text-gray-500 hover:bg-gray-50  group">
-                    <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </a>
+        <div
+            ref={menuRef}
+            className="absolute bottom-20 right-4 z-40 w-72 origin-bottom-right bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5"
+        >
+            <div className="p-4 border-b">
+                <div className="flex items-center space-x-3">
+                    <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
+                    <div>
+                        <h4 className="font-bold text-gray-800">{user?.firstName} {user?.lastName}</h4>
+                        <Link to="/profile" onClick={onClose} className="text-sm text-blue-600 hover:underline">View Profile</Link>
+                    </div>
+                </div>
+            </div>
+            <div className="py-2">
+                <MenuItem icon={<FiSettings size={20} />} text="Settings" />
+                <MenuItem icon={<FiHelpCircle size={20} />} text="Help & Support" />
+                <MenuItem icon={<FiLogOut size={20} />} text="Log Out" onClick={logOut} />
             </div>
         </div>
+    );
+};
+
+
+// ===================================================================
+// MAIN COMPONENT: The Mobile Bottom Navigation Bar
+// ===================================================================
+const MobileBottomNav = () => {
+    const { user } = useAuth();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const menuButton = event.target.closest('[data-menu-button="mobile-profile"]');
+            if (menuRef.current && !menuRef.current.contains(event.target) && !menuButton) {
+                setIsMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const NavItem = ({ to, icon, isActive = false, onClick, menuButtonId }) => {
+        const content = (
+            <div className={`inline-flex flex-col items-center justify-center px-5 h-full group ${isActive ? 'text-blue-600' : 'text-gray-500 hover:text-blue-600'}`}>
+                {icon}
+            </div>
+        );
+
+        if (onClick) {
+            return <button onClick={onClick} data-menu-button={menuButtonId} className="w-full h-full">{content}</button>;
+        }
+
+        return <Link to={to} className="w-full h-full">{content}</Link>;
+    };
+
+    return (
+        <>
+            {isMenuOpen && <MobileProfileMenu user={user} menuRef={menuRef} onClose={() => setIsMenuOpen(false)} />}
+            
+            <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 lg:hidden">
+                <div className="grid h-full max-w-lg grid-cols-5 mx-auto font-medium">
+                    <NavItem to="/feed" icon={<HiOutlineHome size={28} />} isActive={true} />
+                    <NavItem to="#" icon={<HiOutlineUsers size={28} />} />
+                    <NavItem to="#" icon={<HiOutlineBell size={28} />} />
+                    <NavItem to="#" icon={<HiOutlineChatBubbleOvalLeft size={28} />} />
+                    
+                    {/* The Hamburger Menu Trigger Button */}
+                    <NavItem 
+                        icon={<HiOutlineBars3 size={28} />} 
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        menuButtonId="mobile-profile"
+                    />
+                </div>
+            </div>
+        </>
     );
 };
 

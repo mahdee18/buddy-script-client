@@ -53,7 +53,7 @@ const LikersModal = ({ isOpen, onClose, fetchLikers }) => {
     }, [isOpen, fetchLikers]);
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 bg-opacity-50 backdrop-blur-sm" onClick={onClose}>
             <div className="bg-white rounded-lg w-full max-w-sm p-6 shadow-xl" onClick={e => e.stopPropagation()}>
                 <h3 className="text-lg font-bold mb-4">Liked by</h3>
                 {loading ? <div className="flex justify-center"><ClipLoader size={30} /></div> : (

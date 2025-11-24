@@ -87,10 +87,10 @@ const Register = () => {
                 {error && <p className="mb-4 text-sm text-center text-red-600">{error}</p>}
                 <div className="flex items-center mb-8"><input type="radio" id="terms" name="terms" className="w-4 h-4 text-blue-600" defaultChecked /><label htmlFor="terms" className="ml-2 text-gray-600 text-gray-300">I agree to terms & conditions</label></div>
                 <button type="submit" disabled={loading} className="flex items-center justify-center w-full py-3 mb-12 text-lg font-bold text-white transition duration-300 bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed">
-                   {loading ? <ClipLoader color={"#ffffff"} size={24} /> : 'Register now'}
+                   {loading ? <ClipLoader color={"#ffffff"} size={24} /> : 'Register'}
                 </button>
               </form>
-              <p className="text-center text-gray-600 text-gray-300">Already have an account? <Link to="/login" className="font-semibold text-blue-600 hover:underline">Login</Link></p>
+              <p className="text-center text-gray-600">Already have an account? <Link to="/login" className="font-semibold text-blue-600 hover:underline">Login</Link></p>
             </div>
           </div>
         </div>

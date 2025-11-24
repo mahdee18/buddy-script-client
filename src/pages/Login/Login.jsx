@@ -83,7 +83,7 @@ const handleSubmit = async (e) => {
                   <a href="#" className="text-sm text-blue-600 hover:underline">Forgot password?</a>
                 </div>
                 <button type="submit" disabled={loading} className="flex items-center justify-center w-full py-3 mb-12 text-lg font-bold text-white transition duration-300 bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed">
-                  {loading ? <ClipLoader color={"#ffffff"} size={24} /> : 'Login now'}
+                  {loading ? <ClipLoader color={"#ffffff"} size={24} /> : 'Login'}
                 </button>
               </form>
               <p className="text-center text-gray-600">
