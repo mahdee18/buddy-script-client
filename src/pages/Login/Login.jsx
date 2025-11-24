@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth'; 
 import ClipLoader from "react-spinners/ClipLoader";
+import Swal from 'sweetalert2'; // 1. Import SweetAlert2
 
 // Import your images
 import shape1 from '../../assets/images/shape1.svg';
@@ -23,25 +24,40 @@ const Login = () => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
-    console.log("1. handleSubmit triggered in Login.jsx");
 
     try {
-      console.log("2. Calling loginAction...");
-      await loginAction(credentials);
-      console.log("5. loginAction FINISHED. Navigating..."); 
+      const userData = await loginAction(credentials);
+      
+      // 2. Show the success alert
+      await Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `Welcome back, ${userData.firstName}!`,
+        showConfirmButton: false,
+        timer: 2000, // Alert will close after 2 seconds
+        timerProgressBar: true,
+      });
 
+      // 3. Navigate after the alert has closed
       navigate('/feed');
+
     } catch (err) {
+      // Use SweetAlert2 for errors as well for a consistent look
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: err.response?.data?.message || "Please check your credentials and try again.",
+      });
       setError(err.response?.data?.message || "Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
-};
+  };
 
   return (
     <section className="relative min-h-screen bg-[#F3F5F9] flex items-center justify-center p-4 overflow-hidden">
@@ -77,7 +93,8 @@ const handleSubmit = async (e) => {
                   <label className="block mb-2 font-medium text-gray-700">Password</label>
                   <input type="password" name="password" value={credentials.password} onChange={handleChange} required className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
-                {error && <p className="mb-4 text-sm text-center text-red-600">{error}</p>}
+                {/* Error is now shown in the alert, but you can keep this as a fallback if you like */}
+                {/* {error && <p className="mb-4 text-sm text-center text-red-600">{error}</p>} */}
                 <div className="flex flex-wrap items-center justify-between mb-8">
                   <div className="flex items-center"><input type="radio" id="rememberMe" name="remember" className="w-4 h-4 text-blue-600" defaultChecked /><label htmlFor="rememberMe" className="ml-2 text-gray-600">Remember me</label></div>
                   <a href="#" className="text-sm text-blue-600 hover:underline">Forgot password?</a>

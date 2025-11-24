@@ -1,29 +1,20 @@
 import axiosInstance from './axiosInstance';
 
-export const registerUser = async (userData) => {
+// A single, reusable function for handling API requests.
+const apiRequest = async (method, url, payload = null) => {
   try {
-    const { data } = await axiosInstance.post('/users/register', userData);
+    const { data } = await axiosInstance[method](url, payload);
     return data;
   } catch (error) {
-    throw error;
+    const errorMessage = error.response?.data?.message || error.message;
+    throw new Error(errorMessage);
   }
 };
 
-export const loginUser = async (credentials) => {
-  try {
-    console.log("4. loginUser in api/auth.js called. Making Axios call now...");
-    const { data } = await axiosInstance.post('/users/login', credentials);
-    return data;
-  } catch (error) {
-    throw error;
-  }
-};
+/**
+ * Registers a new user. */
+export const registerUser = (userData) => apiRequest('post', '/users/register', userData);
 
-export const getMe = async () => {
-    try {
-        const { data } = await axiosInstance.get('/users/me');
-        return data;
-    } catch (error) {
-        throw error;
-    }
-};
+export const loginUser = (credentials) => apiRequest('post', '/users/login', credentials);
+
+export const getMe = () => apiRequest('get', '/users/me');

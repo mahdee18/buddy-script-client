@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import ClipLoader from "react-spinners/ClipLoader";
+import Swal from 'sweetalert2'; // 1. Import SweetAlert2
 
 // images
 import shape1 from '../../assets/images/shape1.svg';
@@ -19,7 +20,7 @@ const Register = () => {
     password: '',
     repeatPassword: ''
   });
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(null); // Keep for inline errors if needed, though Swal handles it now
   const [loading, setLoading] = useState(false);
 
   const { registerAction } = useAuth();
@@ -27,26 +28,56 @@ const Register = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError(null); // Clear previous errors when user starts typing
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // 2. Use SweetAlert for password mismatch error
     if (formData.password !== formData.repeatPassword) {
-      setError("Passwords do not match.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Passwords do not match!',
+      });
+      setError("Passwords do not match."); // You can still set this for inline text if you want
       return;
     }
+    
     setLoading(true);
     setError(null);
+
     try {
-      await registerAction({
+      const userData = await registerAction({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
       });
+
+      // 3. Show a success alert
+      await Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `Welcome, ${userData.firstName}! Your account is created.`,
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+      });
+
       navigate('/feed');
+
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      const errorMessage = err.response?.data?.message || "Registration failed. Please try again.";
+      // 4. Show a failure alert
+      Swal.fire({
+        icon: 'error',
+        title: 'Registration Failed',
+        text: errorMessage,
+      });
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -68,7 +99,6 @@ const Register = () => {
             <img src={registerImage} alt="Registration Illustration" className="w-full h-auto" />
           </div>
 
-          {/* Form Card */}
           <div className="w-full max-w-md mx-auto lg:mx-0 lg:max-w-none">
             <div className="px-6 py-10 bg-white  rounded-xl shadow-2xl md:px-10">
               <div className="mb-7"><img src={logo} alt="Buddy Script Logo" /></div>
@@ -84,8 +114,11 @@ const Register = () => {
                 <div className="mb-4"><label className="block mb-2 font-medium text-gray-700">Email</label><input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full px-4 py-3 bg-white  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /></div>
                 <div className="mb-4"><label className="block mb-2 font-medium text-gray-700">Password</label><input type="password" name="password" value={formData.password} onChange={handleChange} required className="w-full px-4 py-3 bg-white  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /></div>
                 <div className="mb-4"><label className="block mb-2 font-medium text-gray-700">Repeat Password</label><input type="password" name="repeatPassword" value={formData.repeatPassword} onChange={handleChange} required className="w-full px-4 py-3 bg-white  border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /></div>
-                {error && <p className="mb-4 text-sm text-center text-red-600">{error}</p>}
-                <div className="flex items-center mb-8"><input type="radio" id="terms" name="terms" className="w-4 h-4 text-blue-600" defaultChecked /><label htmlFor="terms" className="ml-2 text-gray-600 text-gray-300">I agree to terms & conditions</label></div>
+                
+                {/* Error text can be removed since Swal is handling it now */}
+                {/* {error && <p className="mb-4 text-sm text-center text-red-600">{error}</p>} */}
+
+                <div className="flex items-center mb-8"><input type="radio" id="terms" name="terms" className="w-4 h-4 text-blue-600" defaultChecked /><label htmlFor="terms" className="ml-2 text-gray-600">I agree to terms & conditions</label></div>
                 <button type="submit" disabled={loading} className="flex items-center justify-center w-full py-3 mb-12 text-lg font-bold text-white transition duration-300 bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed">
                    {loading ? <ClipLoader color={"#ffffff"} size={24} /> : 'Register'}
                 </button>

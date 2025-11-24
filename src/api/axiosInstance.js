@@ -1,23 +1,24 @@
 import axios from 'axios';
 
-// base URL.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
+// Centralized API instance.
 const axiosInstance = axios.create({
-  baseURL: API_URL, 
+  baseURL: import.meta.env.VITE_API_URL || '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
+// Inject the auth token into every outgoing request.
 axiosInstance.interceptors.request.use(
-  (config) => {const token = localStorage.getItem('authToken'); 
-    
+  (config) => {
+    const token = localStorage.getItem('authToken');
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  // Forward request errors.
+  (error) => Promise.reject(error)
 );
 
 export default axiosInstance;

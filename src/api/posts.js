@@ -1,73 +1,75 @@
-import axios from 'axios';
+import axiosInstance from './axiosInstance'; 
 
-const API_URL = '/api/posts';
+const API_URL = '/posts';
 
 // --- POSTS ---
-export const createPost = async (postData, token) => {
-    const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
-    const response = await axios.post(API_URL, postData, config);
-    return response.data;
+
+/** Creates a new post. */
+export const createPost = async (postData) => {
+  const { data } = await axiosInstance.post(API_URL, postData);
+  return data;
 };
 
+/** Fetches all relevant posts.*/
 export const getAllPosts = async () => {
-    // To get the correct posts based on visibility, we must send our auth token if we have it.
-    // The backend will handle showing public posts if the token is missing or invalid.
-    const token = localStorage.getItem('authToken'); // Assuming this is where you store your token
-    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-    const response = await axios.get(API_URL, config);
-    return response.data;
+  const { data } = await axiosInstance.get(API_URL);
+  return data;
 };
 
-export const deletePost = async (postId, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const response = await axios.delete(`${API_URL}/${postId}`, config);
-    return response.data;
+/** Deletes a specific post by its ID.*/
+export const deletePost = async (postId) => {
+  const { data } = await axiosInstance.delete(`${API_URL}/${postId}`);
+  return data;
 };
 
-export const likePost = async (postId, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const response = await axios.put(`${API_URL}/${postId}/like`, null, config);
-    return response.data;
+/** Toggles a like on a post. */
+export const likePost = async (postId) => {
+  const { data } = await axiosInstance.put(`${API_URL}/${postId}/like`);
+  return data;
 };
 
-// ==========================================================
-// THE MISSING FUNCTION
-// ==========================================================
-export const updatePostVisibility = async (postId, visibility, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const response = await axios.put(`${API_URL}/${postId}/visibility`, { visibility }, config);
-    return response.data;
+/** Updates the visibility of a post. */
+export const updatePostVisibility = async (postId, visibility) => {
+  const { data } = await axiosInstance.put(`${API_URL}/${postId}/visibility`, { visibility });
+  return data;
 };
+
 
 // --- COMMENTS ---
-export const addComment = async (postId, content, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const response = await axios.post(`${API_URL}/${postId}/comments`, { content }, config);
-    return response.data;
+
+/** Adds a comment to a post.*/
+export const addComment = async (postId, content) => {
+  const { data } = await axiosInstance.post(`${API_URL}/${postId}/comments`, { content });
+  return data;
 };
 
-export const likeComment = async (postId, commentId, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const response = await axios.put(`${API_URL}/${postId}/comments/${commentId}/like`, null, config);
-    return response.data;
+/** Toggles a like on a comment.*/
+export const likeComment = async (postId, commentId) => {
+  const { data } = await axiosInstance.put(`${API_URL}/${postId}/comments/${commentId}/like`);
+  return data;
 };
+
 
 // --- REPLIES ---
-export const addReply = async (postId, commentId, content, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const response = await axios.post(`${API_URL}/${postId}/comments/${commentId}/reply`, { content }, config);
-    return response.data;
+
+/** Adds a reply to a comment.*/
+export const addReply = async (postId, commentId, content) => {
+  const { data } = await axiosInstance.post(`${API_URL}/${postId}/comments/${commentId}/reply`, { content });
+  return data;
 };
 
-export const likeReply = async (postId, commentId, replyId, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` } };
-    const response = await axios.put(`${API_URL}/${postId}/comments/${commentId}/replies/${replyId}/like`, null, config);
-    return response.data;
+/** Toggles a like on a reply. */
+export const likeReply = async (postId, commentId, replyId) => {
+  const { data } = await axiosInstance.put(`${API_URL}/${postId}/comments/${commentId}/replies/${replyId}/like`);
+  return data;
 };
+
 
 // --- LIKERS ---
-export const getLikers = async (postId, { commentId, replyId }, token) => {
-    const config = { headers: { Authorization: `Bearer ${token}` }, params: { commentId, replyId } };
-    const response = await axios.get(`${API_URL}/${postId}/likers`, config);
-    return response.data;
+
+export const getLikers = async (postId, { commentId, replyId }) => {
+  const { data } = await axiosInstance.get(`${API_URL}/${postId}/likers`, {
+    params: { commentId, replyId },
+  });
+  return data;
 };
