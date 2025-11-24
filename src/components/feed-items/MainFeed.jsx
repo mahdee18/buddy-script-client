@@ -1,43 +1,63 @@
+import React, { useEffect, useState,  } from 'react'; 
 import CreatePost from './CreatePost';
 import PostCard from './PostCard';
 import Stories from './Stories';
-
-const dummyPosts = [
-    {
-        id: 1,
-        author: { name: 'Karim Saif', avatar: '/src/assets/images/post_img.png' },
-        timestamp: '5 minutes ago',
-        content: '-Healthy Tracking App',
-        imageUrl: '/src/assets/images/timeline_img.png',
-        shares: 122,
-        comments: [
-             {
-                id: 'c1',
-                author: { name: 'Radovan SkillArena', avatar: '/src/assets/images/txt_img.png' },
-                content: 'It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.',
-                timestamp: '21m'
-             }
-        ]
-    },
-    {
-        id: 2,
-        author: { name: 'Steve Jobs', avatar: '/src/assets/images/people1.png' },
-        timestamp: '1 hour ago',
-        content: 'Excited to announce our new product lineup! It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.',
-        imageUrl: null,
-        shares: 250,
-        comments: []
-    },
-];
+import ClipLoader from "react-spinners/ClipLoader";
+import { getAllPosts } from '../../api/posts';
 
 const MainFeed = () => {
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                setLoading(true);
+                const fetchedPosts = await getAllPosts();
+                setPosts(fetchedPosts);
+                setError('');
+            } catch (err) {
+                setError('Failed to load feed. Please try refreshing the page.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPosts();
+    }, []); 
+     const handlePostCreated = (newPost) => {
+        setPosts(prevPosts => [newPost, ...prevPosts]);
+    };
+
+    const renderContent = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center my-12">
+                    <ClipLoader color={"#3b82f6"} size={50} />
+                </div>
+            );
+        }
+
+        if (error) {
+            return <p className="text-center text-red-500 my-8">{error}</p>;
+        }
+
+        if (posts.length === 0) {
+            return <p className="text-center text-gray-500 my-8">No posts yet. Be the first to share something!</p>;
+        }
+
+        return posts.map(post => (
+            <PostCard key={post._id} post={post} />
+        ));
+    };
+
     return (
         <div>
             <Stories />
-            <CreatePost />
-            {dummyPosts.map(post => (
-                <PostCard key={post.id} post={post} />
-            ))}
+            <CreatePost onPostCreated={handlePostCreated} />
+            {renderContent()}
         </div>
     );
 };

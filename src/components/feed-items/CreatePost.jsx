@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { createPost } from '../../api/posts';
 import ClipLoader from "react-spinners/ClipLoader";
-import axios from 'axios'; // <--- ADD THIS LINE
+import axios from 'axios';
 
 const CreatePost = ({ onPostCreated }) => {
     const { user, token } = useAuth();
@@ -53,12 +53,11 @@ const CreatePost = ({ onPostCreated }) => {
             if (imageFile) {
                 const formData = new FormData();
                 formData.append('image', imageFile);
-                // This line requires 'axios' to be imported
                 const response = await axios.post(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, formData);
                 if (response.data.success) {
                     hostedImageUrl = response.data.data.url;
                 } else {
-                    throw new Error('Image upload to the hosting service failed.');
+                    throw new Error('Image upload to hosting service failed.');
                 }
             }
 
@@ -76,15 +75,14 @@ const CreatePost = ({ onPostCreated }) => {
             const serverErrorMessage = err.response?.data?.message || err.message || 'An unexpected error occurred.';
             setError(`Failed to create post. ${serverErrorMessage}`);
         } finally {
+            // This is the critical fix: always stop loading
             setLoading(false);
         }
     };
 
-    // ... The rest of your JSX remains the same ...
     return (
         <div className="p-4 sm:p-6 mb-6 bg-white rounded-lg shadow">
-            {/* Your JSX */}
-             <div className="flex items-start space-x-4">
+            <div className="flex items-start space-x-4">
                 <img src={user?.profilePicture || "/src/assets/images/profile.png"} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
                 <textarea
                     value={content}
@@ -113,7 +111,7 @@ const CreatePost = ({ onPostCreated }) => {
                     <input type="file" accept="image/*" ref={imageInputRef} onChange={handleImageChange} className="hidden" />
                     <button onClick={() => imageInputRef.current.click()} className="flex items-center gap-2 transition hover:text-blue-600">📷 Photo</button>
                 </div>
-                <button onClick={handleSubmit} disabled={loading || !user} className="w-full sm:w-auto mt-4 sm:mt-0 px-6 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors">
+                <button onClick={handleSubmit} disabled={loading} className="w-full sm:w-auto mt-4 sm:mt-0 px-6 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors">
                     {loading ? <ClipLoader color="#ffffff" size={20} /> : 'Post'}
                 </button>
             </div>
