@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext, useMemo } from 'react'; // 1. Import useMemo
 import { registerUser, loginUser, getMe } from '../api/auth';
 import ClipLoader from "react-spinners/ClipLoader";
 
@@ -46,29 +46,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-const loginAction = async (credentials) => {
+  const loginAction = async (credentials) => {
     try {
-      console.log("3. loginAction in context called with:", credentials);
       const data = await loginUser(credentials);
-      
       localStorage.setItem('authToken', data.token);
       setToken(data.token);
       const { token, ...userDataWithoutToken } = data;
       setUser(userDataWithoutToken);
-      
       return data;
     } catch (error) {
         console.error("Error inside loginAction:", error);
         throw error;
     }
-};
+  };
 
   const logOut = () => {
     localStorage.removeItem('authToken');
     setToken(null);
     setUser(null);
-    window.location.href = '/login';
-  };
+     };
+
+ 
+  const authContextValue = useMemo(
+    () => ({
+      token,
+      user,
+      loading,
+      registerAction,
+      loginAction,
+      logOut,
+    }),
+    [token, user, loading] 
+  );
 
   if (loading) {
     return (
@@ -79,7 +88,7 @@ const loginAction = async (credentials) => {
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, loading, registerAction, loginAction, logOut }}>
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );
