@@ -50,7 +50,7 @@ const ProfileDropdown = ({ user, menuRef }) => {
 };
 
 // ===================================================================
-// SUB-COMPONENT 2: Notification Dropdown (Complete and Functional)
+// SUB-COMPONENT 2: Notification Dropdown
 // ===================================================================
 const NotificationDropdown = ({ menuRef }) => (
     <div ref={menuRef} className="absolute right-0 mt-2 w-80 md:w-96 bg-white rounded-lg shadow-xl overflow-hidden border">
@@ -143,10 +143,10 @@ const Navbar = () => {
                         <div className="flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
                                 <div className="relative">
-                                    <NavIconButton icon={<HiOutlineBell size={24} />} badgeCount={6} onClick={() => setIsNotificationOpen(!isNotificationOpen)} menuButtonId="notification" />
+                                    <NavIconButton icon={<HiOutlineBell size={24} />} badgeCount={2} onClick={() => setIsNotificationOpen(!isNotificationOpen)} menuButtonId="notification" />
                                     {isNotificationOpen && <NotificationDropdown menuRef={notificationMenuRef} />}
                                 </div>
-                                <NavIconButton icon={<HiOutlineChatBubbleOvalLeft size={24} />} badgeCount={2} />
+                                <NavIconButton icon={<HiOutlineChatBubbleOvalLeft size={24} />} badgeCount={6} />
                             </div>
                             
                             <div className="relative">
