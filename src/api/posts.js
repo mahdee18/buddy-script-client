@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const API_URL = '/api/posts';
 
+// --- POSTS ---
 export const createPost = async (postData, token) => {
     const config = { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` } };
     const response = await axios.post(API_URL, postData, config);
@@ -9,7 +10,11 @@ export const createPost = async (postData, token) => {
 };
 
 export const getAllPosts = async () => {
-    const response = await axios.get(API_URL);
+    // To get the correct posts based on visibility, we must send our auth token if we have it.
+    // The backend will handle showing public posts if the token is missing or invalid.
+    const token = localStorage.getItem('authToken'); // Assuming this is where you store your token
+    const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+    const response = await axios.get(API_URL, config);
     return response.data;
 };
 
@@ -25,6 +30,16 @@ export const likePost = async (postId, token) => {
     return response.data;
 };
 
+// ==========================================================
+// THE MISSING FUNCTION
+// ==========================================================
+export const updatePostVisibility = async (postId, visibility, token) => {
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+    const response = await axios.put(`${API_URL}/${postId}/visibility`, { visibility }, config);
+    return response.data;
+};
+
+// --- COMMENTS ---
 export const addComment = async (postId, content, token) => {
     const config = { headers: { Authorization: `Bearer ${token}` } };
     const response = await axios.post(`${API_URL}/${postId}/comments`, { content }, config);
@@ -37,6 +52,7 @@ export const likeComment = async (postId, commentId, token) => {
     return response.data;
 };
 
+// --- REPLIES ---
 export const addReply = async (postId, commentId, content, token) => {
     const config = { headers: { Authorization: `Bearer ${token}` } };
     const response = await axios.post(`${API_URL}/${postId}/comments/${commentId}/reply`, { content }, config);
@@ -49,6 +65,7 @@ export const likeReply = async (postId, commentId, replyId, token) => {
     return response.data;
 };
 
+// --- LIKERS ---
 export const getLikers = async (postId, { commentId, replyId }, token) => {
     const config = { headers: { Authorization: `Bearer ${token}` }, params: { commentId, replyId } };
     const response = await axios.get(`${API_URL}/${postId}/likers`, config);
