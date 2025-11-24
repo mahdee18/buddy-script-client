@@ -1,215 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../hooks/useAuth';
-import { likePost, addComment, likeComment, addReply, likeReply, getLikers, deletePost, updatePostVisibility } from '../../api/posts';
-import ClipLoader from "react-spinners/ClipLoader";
-import { BsBookmark, BsBell, BsEyeSlash, BsPencil, BsTrash, BsThreeDots, BsGlobe, BsLockFill } from 'react-icons/bs';
-import { FiSend } from 'react-icons/fi'; 
-import Swal from 'sweetalert2';
+import { useDetectOutsideClick } from '../../hooks/useDetectOutsideClick';
+import { likePost, addComment, getLikers, updatePostVisibility } from '../../api/posts';
+import { BsThreeDots, BsGlobe, BsLockFill } from 'react-icons/bs';
+import { FiSend } from 'react-icons/fi';
 
-const VisibilityModal = ({ isOpen, onClose, currentVisibility, onUpdate }) => {
-    if (!isOpen) return null;
+import LikersModal from '../post/LikersModal';
+import Comment from '../post/Comment';
+import PostOptionsMenu from '../post/PostOptionsMenu';
+import VisibilityModal from '../post/VisibilityModal';
 
-    const Option = ({ icon, title, description, value }) => (
-        <button onClick={() => onUpdate(value)} className={`w-full text-left p-4 rounded-lg flex items-center gap-4 transition-colors ${currentVisibility === value ? 'bg-blue-50 border-2 border-blue-500' : 'hover:bg-gray-100 border-2 border-transparent'}`}>
-            <div className={`p-3 rounded-full ${currentVisibility === value ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
-                {icon}
-            </div>
-            <div>
-                <h4 className="font-bold text-gray-800">{title}</h4>
-                <p className="text-sm text-gray-500">{description}</p>
-            </div>
-        </button>
-    );
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/30 bg-opacity-50 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white rounded-lg w-full max-w-md p-6 shadow-xl" onClick={e => e.stopPropagation()}>
-                <h3 className="text-lg font-bold mb-4">Who can see this post?</h3>
-                <div className="space-y-3">
-                    <Option icon={<BsGlobe size={20} />} title="Public" description="Visible to everyone" value="public" />
-                    <Option icon={<BsLockFill size={20} />} title="Private" description="Visible only to you" value="private" />
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// ===================================================================
-// SUB-COMPONENT 2: LIKERS MODAL
-// ===================================================================
-const LikersModal = ({ isOpen, onClose, fetchLikers }) => {
-    const [likers, setLikers] = useState([]);
-    const [loading, setLoading] = useState(false);
-    useEffect(() => {
-        if (!isOpen) return;
-        const loadLikers = async () => {
-            setLoading(true);
-            try { const data = await fetchLikers(); setLikers(data); } 
-            catch (error) { console.error("Failed to fetch likers:", error); } 
-            finally { setLoading(false); }
-        };
-        loadLikers();
-    }, [isOpen, fetchLikers]);
-    if (!isOpen) return null;
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 bg-opacity-50 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white rounded-lg w-full max-w-sm p-6 shadow-xl" onClick={e => e.stopPropagation()}>
-                <h3 className="text-lg font-bold mb-4">Liked by</h3>
-                {loading ? <div className="flex justify-center"><ClipLoader size={30} /></div> : (
-                    <ul className="space-y-3 max-h-80 overflow-y-auto">
-                        {likers.length > 0 ? likers.map(liker => (
-                            <li key={liker._id} className="flex items-center space-x-3">
-                                <img src={liker.profilePicture || '/src/assets/images/profile.png'} alt={liker.firstName} className="w-10 h-10 rounded-full object-cover" />
-                                <span>{liker.firstName} {liker.lastName}</span>
-                            </li>
-                        )) : <p className="text-gray-500">No one has liked this yet.</p>}
-                    </ul>
-                )}
-            </div>
-        </div>
-    );
-};
-
-// ===================================================================
-// SUB-COMPONENT 3: POST OPTIONS MENU
-// ===================================================================
-const PostOptionsMenu = ({ post, user, token, menuRef, onClose, onPostDeleted }) => {
-    const isAuthor = post.author._id === user?._id;
-    const handleDelete = () => {
-        onClose();
-        Swal.fire({
-            title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning',
-            showCancelButton: true, confirmButtonColor: '#3085d6', cancelButtonColor: '#d33', confirmButtonText: 'Yes, delete it!'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    await deletePost(post._id, token);
-                    Swal.fire('Deleted!', 'Your post has been deleted.', 'success');
-                    onPostDeleted(post._id);
-                } catch (error) {
-                    Swal.fire('Failed!', 'Could not delete the post.', 'error');
-                }
-            }
-        });
-    };
-    const MenuItem = ({ icon, text, onClick, isDestructive = false }) => (
-        <button onClick={onClick} className={`flex items-center w-full gap-3 px-4 py-2 text-left text-sm transition-colors duration-150 ${ isDestructive ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-100' }`}>
-            <span className="p-2 bg-gray-100 rounded-full">{icon}</span>
-            <span className="font-semibold">{text}</span>
-        </button>
-    );
-    return (
-        <div ref={menuRef} className="absolute right-0 z-20 w-64 mt-2 origin-top-right bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 py-2">
-            <MenuItem icon={<BsBookmark size={16} />} text="Save Post" />
-            <MenuItem icon={<BsBell size={16} />} text="Turn On Notification" />
-            <MenuItem icon={<BsEyeSlash size={16} />} text="Hide" />
-            {isAuthor && (
-                <>
-                    <hr className="my-1" />
-                    <MenuItem icon={<BsPencil size={16} />} text="Edit Post" />
-                    <MenuItem icon={<BsTrash size={16} />} text="Delete Post" onClick={handleDelete} isDestructive />
-                </>
-            )}
-        </div>
-    );
-};
-
-// ===================================================================
-// SUB-COMPONENT 4: A SINGLE REPLY
-// ===================================================================
-const Reply = ({ postId, commentId, replyData, onReplyUpdated, onLikersClick }) => {
-    const { user, token } = useAuth();
-    const isLikedByCurrentUser = replyData.likes.some(likeId => (likeId._id || likeId).toString() === user?._id);
-    const handleReplyLikeToggle = async () => {
-        if (!user) return;
-        const newLikes = isLikedByCurrentUser ? replyData.likes.filter(id => (id._id || id).toString() !== user._id) : [...replyData.likes, user._id];
-        onReplyUpdated({ ...replyData, likes: newLikes });
-        try { await likeReply(postId, commentId, replyData._id, token); } 
-        catch (error) { onReplyUpdated(replyData); }
-    };
-    return (
-        <div className="flex items-start space-x-3 ml-12">
-            <img src={replyData.author.profilePicture || '/src/assets/images/profile.png'} alt={replyData.author.firstName} className="object-cover w-8 h-8 rounded-full"/>
-            <div className="flex-1">
-                <div className="p-2 bg-gray-50 rounded-lg">
-                    <p className="text-sm font-semibold text-gray-800">{replyData.author.firstName} {replyData.author.lastName}</p>
-                    <p className="text-sm text-gray-700">{replyData.content}</p>
-                </div>
-                <div className="flex items-center gap-4 px-2 mt-1 text-xs text-gray-500">
-                    <button onClick={handleReplyLikeToggle} className={`font-semibold ${isLikedByCurrentUser ? 'text-blue-600' : 'hover:underline'}`}>Like</button>
-                    <button onClick={() => onLikersClick({ replyId: replyData._id })} className="hover:underline">{replyData.likes.length > 0 && `${replyData.likes.length} Likes`}</button>
-                    <span>{formatDistanceToNow(new Date(replyData.createdAt), { addSuffix: true })}</span>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// ===================================================================
-// SUB-COMPONENT 5: A SINGLE COMMENT
-// ===================================================================
-const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
-    const { user, token } = useAuth();
-    const [isReplying, setIsReplying] = useState(false);
-    const [replyContent, setReplyContent] = useState('');
-    const isLikedByCurrentUser = commentData.likes.some(likeId => (likeId._id || likeId).toString() === user?._id);
-    const handleCommentLikeToggle = async () => {
-        if (!user) return;
-        const newLikes = isLikedByCurrentUser ? commentData.likes.filter(id => (id._id || id).toString() !== user._id) : [...commentData.likes, user._id];
-        onCommentUpdated({ ...commentData, likes: newLikes });
-        try { await likeComment(postId, commentData._id, token); } 
-        catch (error) { onCommentUpdated(commentData); }
-    };
-    const handleAddReply = async (e) => {
-        e.preventDefault();
-        if (!replyContent.trim()) return;
-        try {
-            const newReply = await addReply(postId, commentData._id, replyContent, token);
-            onCommentUpdated({ ...commentData, replies: [...(commentData.replies || []), newReply] });
-            setReplyContent('');
-            setIsReplying(false);
-        } catch (error) { console.error("Failed to add reply:", error); }
-    };
-    const handleReplyUpdated = (updatedReply) => {
-        const updatedReplies = commentData.replies.map(r => r._id === updatedReply._id ? updatedReply : r);
-        onCommentUpdated({ ...commentData, replies: updatedReplies });
-    };
-    return (
-        <div className="space-y-3">
-            <div className="flex items-start space-x-3">
-                <img src={commentData.author.profilePicture || '/src/assets/images/profile.png'} alt={commentData.author.firstName} className="object-cover w-10 h-10 rounded-full"/>
-                <div className="flex-1">
-                    <div className="p-3 bg-gray-100 rounded-lg">
-                        <p className="text-sm font-semibold text-gray-800">{commentData.author.firstName} {commentData.author.lastName}</p>
-                        <p className="text-sm text-gray-700">{commentData.content}</p>
-                    </div>
-                    <div className="flex items-center gap-4 px-2 mt-1 text-xs text-gray-500">
-                        <button onClick={handleCommentLikeToggle} className={`font-semibold ${isLikedByCurrentUser ? 'text-blue-600' : 'hover:underline'}`}>Like</button>
-                        <button onClick={() => onLikersClick({ commentId: commentData._id })} className="hover:underline">{commentData.likes.length > 0 && `${commentData.likes.length} Likes`}</button>
-                        <button onClick={() => setIsReplying(!isReplying)} className="font-semibold hover:underline">Reply</button>
-                        <span>{formatDistanceToNow(new Date(commentData.createdAt), { addSuffix: true })}</span>
-                    </div>
-                </div>
-            </div>
-            {commentData.replies?.map(reply => <Reply key={reply._id} postId={postId} commentId={commentData._id} replyData={reply} onReplyUpdated={handleReplyUpdated} onLikersClick={(ids) => onLikersClick({ ...ids, commentId: commentData._id })} />)}
-            {isReplying && (
-                <form onSubmit={handleAddReply} className="flex items-center space-x-3 ml-12">
-                    <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-8 h-8 rounded-full" />
-                    <input type="text" value={replyContent} onChange={(e) => setReplyContent(e.target.value)} placeholder="Write a reply..." className="w-full p-2 text-sm bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-                    {/* FIX: Smaller reply button */}
-                    <button type="submit" disabled={!replyContent.trim()} className="p-2 text-white bg-blue-600 rounded-full hover:bg-blue-700 disabled:bg-blue-300">
-                        <FiSend size={16}/>
-                    </button>
-                </form>
-            )}
-        </div>
-    );
-};
-
-// ===================================================================
-// MAIN COMPONENT: THE POST CARD
-// ===================================================================
 const PostCard = ({ post, onPostDeleted }) => {
     const { user, token } = useAuth();
     const [currentPost, setCurrentPost] = useState(post);
@@ -217,19 +18,8 @@ const PostCard = ({ post, onPostDeleted }) => {
     const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
     const [isVisibilityModalOpen, setIsVisibilityModalOpen] = useState(false);
     const [likersQuery, setLikersQuery] = useState({});
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const menuRef = useRef(null);
+    const [isMenuOpen, setIsMenuOpen, menuRef] = useDetectOutsideClick(false);
     
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setIsMenuOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
     useEffect(() => { setCurrentPost(post); }, [post]);
     
     const isAuthor = user?._id === currentPost.author._id;
@@ -311,10 +101,10 @@ const PostCard = ({ post, onPostDeleted }) => {
                     </div>
                     {isAuthor && (
                         <div className="relative">
-                            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 text-gray-500 rounded-full hover:bg-gray-100">
+                            <button onClick={() => setIsMenuOpen(true)} className="p-2 text-gray-500 rounded-full hover:bg-gray-100">
                                 <BsThreeDots className="w-5 h-5" />
                             </button>
-                            {isMenuOpen && <PostOptionsMenu post={currentPost} user={user} token={token} menuRef={menuRef} onClose={() => setIsMenuOpen(false)} onPostDeleted={onPostDeleted} />}
+                            {isMenuOpen && <PostOptionsMenu post={currentPost} menuRef={menuRef} onClose={() => setIsMenuOpen(false)} onPostDeleted={onPostDeleted} />}
                         </div>
                     )}
                 </div>
@@ -337,7 +127,6 @@ const PostCard = ({ post, onPostDeleted }) => {
                     <form onSubmit={handleCommentSubmit} className="flex items-start mt-4 space-x-3">
                         <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-10 h-10 rounded-full" />
                         <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} className="w-full p-2 text-sm bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Write a comment..." />
-                        {/* FIX: Comment button with icon */}
                         <button type="submit" disabled={!commentContent.trim()} className="p-2.5 text-white bg-blue-600 rounded-full hover:bg-blue-700 disabled:bg-blue-300">
                              <FiSend size={18}/>
                         </button>

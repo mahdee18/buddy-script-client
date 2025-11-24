@@ -8,6 +8,7 @@ import notificationAvatar from '../../assets/images/friend-req.png';
 import { HiOutlineHome, HiOutlineUsers, HiOutlineBell, HiOutlineChatBubbleOvalLeft } from "react-icons/hi2";
 import { FiChevronDown, FiChevronRight, FiSettings, FiHelpCircle, FiLogOut } from "react-icons/fi";
 import { IoSearchOutline } from "react-icons/io5";
+import { useDetectOutsideClick } from '../../hooks/useDetectOutsideClick';
 
 // ===================================================================
 // SUB-COMPONENT 1: Profile Dropdown Menu
@@ -84,11 +85,8 @@ const NotificationDropdown = ({ menuRef }) => (
 // ===================================================================
 const Navbar = () => {
     const { user } = useAuth();
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-    
-    const profileMenuRef = useRef(null);
-    const notificationMenuRef = useRef(null);
+    const [isProfileOpen, setIsProfileOpen, profileMenuRef] = useDetectOutsideClick(false);
+    const [isNotificationOpen, setIsNotificationOpen, notificationMenuRef] = useDetectOutsideClick(false);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
