@@ -4,7 +4,6 @@ const MobileBottomNav = () => {
     return (
         <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 lg:hidden">
             <div className="grid h-full max-w-lg grid-cols-5 mx-auto font-medium">
-                {/* Placeholder Icons - Replace with your actual SVG components */}
                 <a href="#" className="inline-flex flex-col items-center justify-center px-5 text-blue-600 hover:bg-gray-50  group">
                     <svg className="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
                 </a>
