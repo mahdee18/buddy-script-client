@@ -1,39 +1,73 @@
 import React, { useRef } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import Avatar from '../common/Avatar';
+import { FaPlus, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
-const YourStoryCard = () => (
-    <div className="relative flex-shrink-0 w-28 h-48 overflow-hidden rounded-lg shadow-md">
-        <img src="/src/assets/images/card_ppl1.png" alt="Your Story" className="object-cover w-full h-full" />
-        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-        <div className="absolute bottom-0 left-0 right-0 p-2 text-center text-white">
-            <button className="flex items-center justify-center w-8 h-8 mx-auto mb-1 bg-blue-600 border-2 border-white rounded-full">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-            </button>
-            <p className="text-xs font-semibold">Your Story</p>
+// --- Data (In a real app, this would come from an API) ---
+const storiesData = [
+    { name: "Ryan Roslansky", storyImg: "/src/assets/images/card_ppl2.png", avatarImg: "/src/assets/images/mini_pic.png" },
+    { name: "A Begum", storyImg: "/src/assets/images/card_ppl3.png", avatarImg: "/src/assets/images/mini_pic.png" },
+    { name: "John Doe", storyImg: "/src/assets/images/card_ppl4.png", avatarImg: "/src/assets/images/mini_pic.png" },
+    { name: "Jane Smith", storyImg: "/src/assets/images/card_ppl2.png", avatarImg: "/src/assets/images/mini_pic.png" },
+    { name: "Peter Jones", storyImg: "/src/assets/images/card_ppl3.png", avatarImg: "/src/assets/images/mini_pic.png" },
+    { name: "Elon Musk", storyImg: "/src/assets/images/card_ppl4.png", avatarImg: "/src/assets/images/mini_pic.png" },
+];
+
+
+// --- Sub-components for Stories ---
+
+// Your own story card, now uses your profile picture.
+const YourStoryCard = React.memo(() => {
+    const { user } = useAuth();
+    return (
+        <div className="relative flex-shrink-0 w-28 h-48 overflow-hidden rounded-lg shadow-md cursor-pointer group">
+            <img src={user?.profilePicture || '/src/assets/images/card_ppl1.png'} alt="Your Story" className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+            <div className="absolute bottom-0 left-0 right-0 p-2 text-center text-white">
+                <div className="flex items-center justify-center w-8 h-8 mx-auto mb-1 bg-blue-600 border-2 border-white rounded-full">
+                    <FaPlus size={16} />
+                </div>
+                <p className="text-xs font-semibold">Your Story</p>
+            </div>
         </div>
-    </div>
-);
+    );
+});
 
-const StoryCard = ({ name, storyImg, avatarImg }) => (
-    <div className="relative flex-shrink-0 w-28 h-48 overflow-hidden rounded-lg shadow-md">
-        <img src={storyImg} alt={name} className="object-cover w-full h-full" />
-        <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-        <img src={avatarImg} alt={name} className="absolute w-10 h-10 border-4 border-blue-600 rounded-full top-3 left-3" />
+// A story card for other users, now uses the Avatar component.
+const StoryCard = React.memo(({ name, storyImg, avatarImg }) => (
+    <div className="relative flex-shrink-0 w-28 h-48 overflow-hidden rounded-lg shadow-md cursor-pointer group">
+        <img src={storyImg} alt={name} className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        <div className="absolute top-3 left-3">
+            <Avatar src={avatarImg} alt={name} className="w-10 h-10 border-4 border-blue-600" />
+        </div>
         <p className="absolute bottom-2 left-2 right-2 text-xs font-semibold text-white truncate">{name}</p>
     </div>
-);
+));
 
-const Stories = () => {
+// Main scrollable container for stories.
+const Stories = React.memo(() => {
     const scrollContainerRef = useRef(null);
 
     const scroll = (direction) => {
-        if (scrollContainerRef.current) {
-            const scrollAmount = scrollContainerRef.current.clientWidth * 0.8;
-            scrollContainerRef.current.scrollBy({
-                left: direction === 'left' ? -scrollAmount : scrollAmount,
-                behavior: 'smooth',
-            });
-        }
+        if (!scrollContainerRef.current) return;
+        const scrollAmount = scrollContainerRef.current.clientWidth * 0.8;
+        scrollContainerRef.current.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth',
+        });
     };
+    
+    // A reusable button for navigation.
+    const ScrollButton = ({ direction, onClick }) => (
+        <button
+            onClick={onClick}
+            aria-label={`Scroll ${direction}`}
+            className={`absolute top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md hover:bg-gray-100 ${direction === 'left' ? 'left-2' : 'right-2'}`}
+        >
+            {direction === 'left' ? <FaChevronLeft className="w-4 h-4 text-gray-600" /> : <FaChevronRight className="w-4 h-4 text-gray-600" />}
+        </button>
+    );
 
     return (
         <div className="relative mb-6 bg-white rounded-lg shadow">
@@ -42,28 +76,12 @@ const Stories = () => {
                 className="flex p-4 space-x-3 overflow-x-auto no-scrollbar"
             >
                 <YourStoryCard />
-                <StoryCard name="Ryan Roslansky" storyImg="/src/assets/images/card_ppl2.png" avatarImg="/src/assets/images/mini_pic.png" />
-                <StoryCard name="A Begum" storyImg="/src/assets/images/card_ppl3.png" avatarImg="/src/assets/images/mini_pic.png" />
-                <StoryCard name="John Doe" storyImg="/src/assets/images/card_ppl4.png" avatarImg="/src/assets/images/mini_pic.png" />
-                <StoryCard name="Jane Smith" storyImg="/src/assets/images/card_ppl2.png" avatarImg="/src/assets/images/mini_pic.png" />
-                <StoryCard name="Peter Jones" storyImg="/src/assets/images/card_ppl3.png" avatarImg="/src/assets/images/mini_pic.png" />
-                <StoryCard name="Elon Musk" storyImg="/src/assets/images/card_ppl4.png" avatarImg="/src/assets/images/mini_pic.png" />
+                {storiesData.map(story => <StoryCard key={story.name} {...story} />)}
             </div>
-
-            <button
-                onClick={() => scroll('left')}
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md hover:bg-gray-100"
-            >
-                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <button
-                onClick={() => scroll('right')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md hover:bg-gray-100"
-            >
-                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
-            </button>
+            <ScrollButton direction="left" onClick={() => scroll('left')} />
+            <ScrollButton direction="right" onClick={() => scroll('right')} />
         </div>
     );
-};
+});
 
 export default Stories;
