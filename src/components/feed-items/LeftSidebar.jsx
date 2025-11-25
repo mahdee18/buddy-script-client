@@ -19,14 +19,14 @@ const sidebarLinks = [
 
 // Data for suggested people.
 const suggestedPeople = [
-    { name: 'Steve Jobs', title: 'CEO of Apple', imgSrc: '/src/assets/images/people1.png' },
-    { name: 'Ryan Roslansky', title: 'CEO of Linkedin', imgSrc: '/src/assets/images/people2.png' },
-    { name: 'Dylan Field', title: 'CEO of Figma', imgSrc: '/src/assets/images/people3.png' }
+    { name: 'Steve Jobs', title: 'CEO of Apple', imgSrc: '/people1.png' },
+    { name: 'Ryan Roslansky', title: 'CEO of Linkedin', imgSrc: '/people2.png' },
+    { name: 'Dylan Field', title: 'CEO of Figma', imgSrc: '/people3.png' }
 ];
 
 // Data for events.
 const events = [
-    { day: '10', month: 'Jul', title: 'No more terrorism no more cry', attendees: 17, imgSrc: '/src/assets/images/feed_event1.png' }
+    { day: '10', month: 'Jul', title: 'No more terrorism no more cry', attendees: 17, imgSrc: '/feed_event1.png' }
 ];
 
 // A single, memoized link component.

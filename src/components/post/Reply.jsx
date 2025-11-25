@@ -17,7 +17,7 @@ const Reply = ({ postId, commentId, replyData, onReplyUpdated, onLikersClick }) 
 
     return (
         <div className="flex items-start space-x-3 ml-12">
-            <img src={replyData.author.profilePicture || '/src/assets/images/profile.png'} alt={replyData.author.firstName} className="object-cover w-8 h-8 rounded-full"/>
+            <img src={replyData.author.profilePicture || '/images/profile.png'} alt={replyData.author.firstName} className="object-cover w-8 h-8 rounded-full"/>
             <div className="flex-1">
                 <div className="p-2 bg-gray-50 rounded-lg">
                     <p className="text-sm font-semibold text-gray-800">{replyData.author.firstName} {replyData.author.lastName}</p>

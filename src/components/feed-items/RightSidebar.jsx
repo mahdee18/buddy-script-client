@@ -6,13 +6,13 @@ import Avatar from '../common/Avatar';
 const suggestedProfile = {
     name: 'Radovan SkillArena',
     title: 'Founder & CEO at Trophy',
-    imgSrc: '/src/assets/images/Avatar.png'
+    imgSrc: '/Avatar.png'
 };
 
 const friendsList = [
-    { name: 'Steve Jobs', title: 'CEO of Apple', imgSrc: '/src/assets/images/people1.png', isActive: false },
-    { name: 'Ryan Roslansky', title: 'CEO of Linkedin', imgSrc: '/src/assets/images/people2.png', isActive: true },
-    { name: 'Dylan Field', title: 'CEO of Figma', imgSrc: '/src/assets/images/people3.png', isActive: true }
+    { name: 'Steve Jobs', title: 'CEO of Apple', imgSrc: '/people1.png', isActive: false },
+    { name: 'Ryan Roslansky', title: 'CEO of Linkedin', imgSrc: '/people2.png', isActive: true },
+    { name: 'Dylan Field', title: 'CEO of Figma', imgSrc: '/people3.png', isActive: true }
 ];
 
 // --- Sub-components for the RightSidebar ---

@@ -31,7 +31,7 @@ const LikersModal = ({ isOpen, onClose, fetchLikers }) => {
                     <ul className="space-y-3 max-h-80 overflow-y-auto">
                         {likers.length > 0 ? likers.map(liker => (
                             <li key={liker._id} className="flex items-center space-x-3">
-                                <img src={liker.profilePicture || '/src/assets/images/profile.png'} alt={liker.firstName} className="w-10 h-10 rounded-full object-cover" />
+                                <img src={liker.profilePicture || '/images/profile.png'} alt={liker.firstName} className="w-10 h-10 rounded-full object-cover" />
                                 <span>{liker.firstName} {liker.lastName}</span>
                             </li>
                         )) : <p className="text-gray-500">No one has liked this yet.</p>}

@@ -81,7 +81,7 @@ const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
     return (
         <div className="space-y-3">
             <div className="flex items-start space-x-3">
-                <img src={commentData.author.profilePicture || '/src/assets/images/profile.png'} alt={commentData.author.firstName} className="object-cover w-10 h-10 rounded-full"/>
+                <img src={commentData.author.profilePicture || '/images/profile.png'} alt={commentData.author.firstName} className="object-cover w-10 h-10 rounded-full"/>
                 <div className="flex-1">
                     <div className="p-3 bg-gray-100 rounded-lg">
                         <p className="text-sm font-semibold text-gray-800">{commentData.author.firstName} {commentData.author.lastName}</p>
@@ -98,7 +98,7 @@ const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
             {commentData.replies?.map(reply => <Reply key={reply._id} postId={postId} commentId={commentData._id} replyData={reply} onReplyUpdated={handleReplyUpdated} onLikersClick={(ids) => onLikersClick({ ...ids, commentId: commentData._id })} />)}
             {isReplying && (
                 <form onSubmit={handleAddReply} className="flex items-center space-x-3 ml-12">
-                    <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-8 h-8 rounded-full" />
+                    <img src={user?.profilePicture || '/images/profile.png'} alt="Your avatar" className="w-8 h-8 rounded-full" />
                     <input type="text" value={replyContent} onChange={(e) => setReplyContent(e.target.value)} placeholder="Write a reply..." className="w-full p-2 text-sm bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                     <button type="submit" disabled={!replyContent.trim()} className="p-2 text-white bg-blue-600 rounded-full hover:bg-blue-700 disabled:bg-blue-300">
                         <FiSend size={16}/>

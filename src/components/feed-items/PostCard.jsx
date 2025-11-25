@@ -80,7 +80,7 @@ const PostCard = ({ post, onPostDeleted }) => {
             <div className="p-4 mb-6 bg-white rounded-lg shadow md:p-6">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
-                        <img src={currentPost.author.profilePicture || '/src/assets/images/profile.png'} alt={currentPost.author.firstName} className="object-cover w-12 h-12 rounded-full" />
+                        <img src={currentPost.author.profilePicture || '/profile.png'} alt={currentPost.author.firstName} className="object-cover w-12 h-12 rounded-full" />
                         <div>
                             <h4 className="font-bold text-gray-800">{currentPost.author.firstName} {currentPost.author.lastName}</h4>
                             <p className="text-sm text-gray-500">
@@ -125,7 +125,7 @@ const PostCard = ({ post, onPostDeleted }) => {
                 <hr />
                 <div className="pt-4">
                     <form onSubmit={handleCommentSubmit} className="flex items-start mt-4 space-x-3">
-                        <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-10 h-10 rounded-full" />
+                        <img src={user?.profilePicture || '/profile.png'} alt="Your avatar" className="w-10 h-10 rounded-full" />
                         <input value={commentContent} onChange={(e) => setCommentContent(e.target.value)} className="w-full p-2 text-sm bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Write a comment..." />
                         <button type="submit" disabled={!commentContent.trim()} className="p-2.5 text-white bg-blue-600 rounded-full hover:bg-blue-700 disabled:bg-blue-300">
                              <FiSend size={18}/>

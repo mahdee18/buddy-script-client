@@ -29,7 +29,7 @@ const MobileProfileMenu = ({ user, menuRef, onClose }) => {
         >
             <div className="p-4 border-b">
                 <div className="flex items-center space-x-3">
-                    <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
+                    <img src={user?.profilePicture || '/images/profile.png'} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
                     <div>
                         <h4 className="font-bold text-gray-800">{user?.firstName} {user?.lastName}</h4>
                         <Link to="/profile" onClick={onClose} className="text-sm text-blue-600 hover:underline">View Profile</Link>

@@ -5,12 +5,12 @@ import { FaPlus, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 // --- Data (In a real app, this would come from an API) ---
 const storiesData = [
-    { name: "Ryan Roslansky", storyImg: "/src/assets/images/card_ppl2.png", avatarImg: "/src/assets/images/mini_pic.png" },
-    { name: "A Begum", storyImg: "/src/assets/images/card_ppl3.png", avatarImg: "/src/assets/images/mini_pic.png" },
-    { name: "John Doe", storyImg: "/src/assets/images/card_ppl4.png", avatarImg: "/src/assets/images/mini_pic.png" },
-    { name: "Jane Smith", storyImg: "/src/assets/images/card_ppl2.png", avatarImg: "/src/assets/images/mini_pic.png" },
-    { name: "Peter Jones", storyImg: "/src/assets/images/card_ppl3.png", avatarImg: "/src/assets/images/mini_pic.png" },
-    { name: "Elon Musk", storyImg: "/src/assets/images/card_ppl4.png", avatarImg: "/src/assets/images/mini_pic.png" },
+    { name: "Ryan Roslansky", storyImg: "/card_ppl2.png", avatarImg: "/mini_pic.png" },
+    { name: "A Begum", storyImg: "/card_ppl3.png", avatarImg: "/mini_pic.png" },
+    { name: "John Doe", storyImg: "/card_ppl4.png", avatarImg: "/mini_pic.png" },
+    { name: "Jane Smith", storyImg: "/card_ppl2.png", avatarImg: "/mini_pic.png" },
+    { name: "Peter Jones", storyImg: "/card_ppl3.png", avatarImg: "/mini_pic.png" },
+    { name: "Elon Musk", storyImg: "/card_ppl4.png", avatarImg: "/mini_pic.png" },
 ];
 
 
@@ -21,7 +21,7 @@ const YourStoryCard = React.memo(() => {
     const { user } = useAuth();
     return (
         <div className="relative flex-shrink-0 w-28 h-48 overflow-hidden rounded-lg shadow-md cursor-pointer group">
-            <img src={user?.profilePicture || '/src/assets/images/card_ppl1.png'} alt="Your Story" className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" />
+            <img src={user?.profilePicture || '/card_ppl1.png'} alt="Your Story" className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" />
             <div className="absolute inset-0 bg-black bg-opacity-30"></div>
             <div className="absolute bottom-0 left-0 right-0 p-2 text-center text-white">
                 <div className="flex items-center justify-center w-8 h-8 mx-auto mb-1 bg-blue-600 border-2 border-white rounded-full">

@@ -33,7 +33,7 @@ const ProfileDropdown = ({ user, menuRef }) => {
         >
             <div className="p-4 border-b">
                 <div className="flex items-center space-x-3">
-                    <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
+                    <img src={user?.profilePicture || '/images/profile.png'} alt="Your avatar" className="w-12 h-12 rounded-full object-cover" />
                     <div>
                         <h4 className="font-bold text-gray-800">{user?.firstName} {user?.lastName}</h4>
                         <Link to="/profile" className="text-sm text-blue-600 hover:underline">View Profile</Link>
@@ -151,7 +151,7 @@ const Navbar = () => {
                             
                             <div className="relative">
                                 <button onClick={() => setIsProfileOpen(!isProfileOpen)} data-menu-button="profile" className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-100 transition-colors">
-                                    <img src={user?.profilePicture || '/src/assets/images/profile.png'} alt="Your avatar" className="w-9 h-9 rounded-full object-cover" />
+                                    <img src={user?.profilePicture || '/images/profile.png'} alt="Your avatar" className="w-9 h-9 rounded-full object-cover" />
                                     <div className="hidden text-sm font-semibold text-gray-700 lg:block">{user?.firstName} {user?.lastName}</div>
                                     <FiChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
                                 </button>
