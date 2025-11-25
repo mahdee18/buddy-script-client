@@ -1,16 +1,36 @@
-# React + Vite
+# BuddyScript – MERN Stack Social Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+BuddyScript is a full-stack social media application built with the **MERN stack (MongoDB, Express, React, Node.js)**. The platform allows users to authenticate, create posts, like/unlike posts, comment, and interact with content in real-time. The project emphasizes performance, security, and a responsive user experience.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## **Project URL**
+[Frontend Deployment](https://buddy-script-client.vercel.app/)  
+[Documentation](https://docs.google.com/document/d/1Ot8xoW8kolA0mWo0-dupg7Ogy59MEi37lIdJ1HchUD4/edit?usp=sharing)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## **Features**
+- **Secure Authentication:** JWT-based login & registration with bcryptjs password encryption  
+- **Post & Feed System:** Create, view, delete posts; unified feed combining public and personal posts  
+- **Post Interactions:** Real-time likes, comments, and nested replies with instant UI feedback  
+- **Responsive UI:** Component-based React interface styled with Tailwind CSS  
+- **Optimistic UI Updates:** Instant visual response for interactions  
+- **Resilient Components:** Graceful handling of missing or partial data  
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## **Technical Stack**
+**Frontend:** React, Vite, Tailwind CSS, React Router, Axios, SweetAlert2  
+**Backend:** Node.js, Express.js, MongoDB (native driver), JWT, bcryptjs  
+**Deployment:** Vercel (static frontend + serverless backend)
+
+---
+
+## **Getting Started**
+
+### **Client**
+1. Clone the repo:  
+```bash
+git clone https://github.com/mahdee18/buddy-script-client.git
+cd buddy-script-client
