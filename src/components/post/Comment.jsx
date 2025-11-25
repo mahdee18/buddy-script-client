@@ -19,21 +19,64 @@ const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
         catch (error) { onCommentUpdated(commentData); }
     };
 
+    // --- FIX STARTS HERE ---
     const handleAddReply = async (e) => {
         e.preventDefault();
         if (!replyContent.trim()) return;
+
+        const contentToPost = replyContent; // Store content locally
+
+        // 1. Create a temporary "Optimistic" reply
+        // We use Date.now() as a temp ID so React can render it immediately
+        const optimisticReply = {
+            _id: Date.now().toString(), 
+            content: contentToPost,
+            author: user, // Use current user details so image/name show up
+            createdAt: new Date().toISOString(),
+            likes: [],
+            replies: []
+        };
+
+        // 2. Update the UI IMMEDIATELY (Don't wait for API)
+        const previousReplies = commentData.replies || [];
+        onCommentUpdated({ 
+            ...commentData, 
+            replies: [...previousReplies, optimisticReply] 
+        });
+
+        // 3. Reset Input
+        setReplyContent('');
+        setIsReplying(false);
+
         try {
-            const newReply = await addReply(postId, commentData._id, replyContent, token);
-            onCommentUpdated({ ...commentData, replies: [...(commentData.replies || []), newReply] });
-            setReplyContent('');
-            setIsReplying(false);
-        } catch (error) { console.error("Failed to add reply:", error); }
+            // 4. Send to Server in background
+            const apiResponse = await addReply(postId, commentData._id, contentToPost, token);
+            
+            // 5. Once server confirms, replace the temp reply with the real one (optional but recommended)
+            // We attach 'user' again to ensure the author object is fully populated
+            const finalReply = { ...apiResponse, author: user };
+            
+            // Replace the last reply (our temp one) with the real server one
+            const updatedReplies = [...previousReplies, finalReply];
+            onCommentUpdated({ ...commentData, replies: updatedReplies });
+
+        } catch (error) {
+            console.error("Failed to add reply:", error);
+            // If it fails, revert the UI change
+            onCommentUpdated({ ...commentData, replies: previousReplies });
+            alert("Failed to post reply. Please try again.");
+        }
     };
+    // --- FIX ENDS HERE ---
     
     const handleReplyUpdated = (updatedReply) => {
         const updatedReplies = commentData.replies.map(r => r._id === updatedReply._id ? updatedReply : r);
         onCommentUpdated({ ...commentData, replies: updatedReplies });
     };
+
+    if (!commentData?.author) {
+        return null;
+    }
 
     return (
         <div className="space-y-3">
