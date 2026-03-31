@@ -3,7 +3,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '../../hooks/useAuth';
 import { likeComment, addReply } from '../../api/posts';
 import Reply from './Reply';
-import { FiSend } from 'react-icons/fi';
+import { FiSend, FiMic, FiImage } from 'react-icons/fi';
+import { FaThumbsUp } from 'react-icons/fa';
 
 const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
     const { user } = useAuth();
@@ -14,27 +15,22 @@ const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
         likeId => (likeId._id || likeId).toString() === user?._id
     );
 
-    // ─── Like a comment (optimistic) ──────────────────────────────────────────
     const handleCommentLikeToggle = async () => {
         if (!user) return;
-
         const originalLikes = commentData.likes || [];
         const newLikes = isLikedByCurrentUser
             ? originalLikes.filter(id => (id._id || id).toString() !== user._id)
             : [...originalLikes, user._id];
 
-        // Update UI immediately
         onCommentUpdated({ ...commentData, likes: newLikes });
 
         try {
             await likeComment(postId, commentData._id);
         } catch (error) {
-            // Revert on failure
             onCommentUpdated({ ...commentData, likes: originalLikes });
         }
     };
 
-    // ─── Add a reply (optimistic) ─────────────────────────────────────────────
     const handleAddReply = async (e) => {
         e.preventDefault();
         if (!replyContent.trim() || !user) return;
@@ -43,19 +39,12 @@ const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
         const tempId = `temp-${Date.now()}`;
         const currentReplies = commentData.replies || [];
 
-        // 1. Build the perfect UI reply
         const optimisticReply = {
-            _id: tempId,
-            content,
-            author: user,
-            createdAt: new Date().toISOString(),
-            likes: [],
+            _id: tempId, content, author: user, createdAt: new Date().toISOString(), likes: [],
         };
 
-        // 2. Show reply immediately on the screen
         const optimisticCommentState = {
-            ...commentData,
-            replies: [...currentReplies, optimisticReply],
+            ...commentData, replies: [...currentReplies, optimisticReply],
         };
         onCommentUpdated(optimisticCommentState);
 
@@ -65,56 +54,31 @@ const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
         try {
             const response = await addReply(postId, commentData._id, content);
             const data = response?.data || response;
-
             let updatedReplies = [...optimisticCommentState.replies];
 
-            // 3. Safely figure out what the backend returned
-            
-            // Scenario A: Backend returns the entire Post object
             if (data && data.comments) {
                 const serverComment = data.comments.find(c => c._id === commentData._id);
                 if (serverComment && serverComment.replies) {
                     const lastServerReply = serverComment.replies[serverComment.replies.length - 1];
                     const realReplyId = typeof lastServerReply === 'object' ? lastServerReply._id : lastServerReply;
-                    if (realReplyId) {
-                        updatedReplies = updatedReplies.map(r => 
-                            r._id === tempId ? { ...r, _id: realReplyId } : r
-                        );
-                    }
+                    if (realReplyId) updatedReplies = updatedReplies.map(r => r._id === tempId ? { ...r, _id: realReplyId } : r);
                 }
-            }
-            // Scenario B: Backend returns the entire updated Comment object
-            else if (data && data.replies) {
+            } else if (data && data.replies) {
                 const lastServerReply = data.replies[data.replies.length - 1];
                 const realReplyId = typeof lastServerReply === 'object' ? lastServerReply._id : lastServerReply;
-                if (realReplyId) {
-                    updatedReplies = updatedReplies.map(r => 
-                        r._id === tempId ? { ...r, _id: realReplyId } : r
-                    );
-                }
-            }
-            // Scenario C: Backend returns just the newly created reply object
-            else if (data && data._id) {
-                updatedReplies = updatedReplies.map(r => 
-                    r._id === tempId ? { ...data, author: user, likes: [] } : r
-                );
+                if (realReplyId) updatedReplies = updatedReplies.map(r => r._id === tempId ? { ...r, _id: realReplyId } : r);
+            } else if (data && data._id) {
+                updatedReplies = updatedReplies.map(r => r._id === tempId ? { ...data, author: user, likes: [] } : r);
             }
 
-            // 4. Give the final fixed array back to PostCard
-            onCommentUpdated({
-                ...commentData,
-                replies: updatedReplies
-            });
+            onCommentUpdated({ ...commentData, replies: updatedReplies });
 
         } catch (error) {
             console.error('Failed to add reply:', error);
-            // Revert on failure
             onCommentUpdated({ ...commentData, replies: currentReplies });
-            alert('Failed to post reply. Please try again.');
         }
     };
 
-    // ─── Reply was liked inside Reply component ───────────────────────────────
     const handleReplyUpdated = (updatedReply) => {
         const updatedReplies = (commentData.replies || []).map(r =>
             r._id === updatedReply._id ? updatedReply : r
@@ -124,79 +88,59 @@ const Comment = ({ postId, commentData, onCommentUpdated, onLikersClick }) => {
 
     if (!commentData?.author) return null;
 
+    const timeAgo = formatDistanceToNow(new Date(commentData.createdAt), { addSuffix: true })
+        .replace('about ', '').replace(' hours', 'h').replace(' hour', 'h').replace(' minutes', 'm').replace(' minute', 'm');
+
     return (
-        <div className="space-y-3">
-            <div className="flex items-start space-x-3">
-                <img
-                    src={commentData.author.profilePicture || '/images/profile.png'}
-                    alt={commentData.author.firstName || 'User'}
-                    className="object-cover w-10 h-10 rounded-full"
-                />
-                <div className="flex-1">
-                    <div className="p-3 bg-gray-100 rounded-lg">
-                        <p className="text-sm font-semibold text-gray-800">
+        <div className="w-full mb-3">
+            <div className="flex items-start space-x-2">
+                <img src={commentData.author.profilePicture || '/profile.png'} alt={commentData.author.firstName} className="object-cover w-9 h-9 rounded-full mt-1" />
+                
+                <div className="flex-1 relative flex flex-col items-start">
+                    <div className="relative inline-block bg-[#f0f2f5] rounded-2xl px-3.5 py-2 max-w-full">
+                        <p className="text-[13px] font-bold text-gray-900 leading-tight mb-0.5">
                             {commentData.author.firstName} {commentData.author.lastName}
                         </p>
-                        <p className="text-sm text-gray-700">{commentData.content}</p>
+                        <p className="text-[14px] text-gray-800 leading-snug break-words">
+                            {commentData.content}
+                        </p>
+
+                        {/* Floating badge ONLY shows thumbs up now (no empty heart) */}
+                        {commentData.likes?.length > 0 && (
+                            <div onClick={() => onLikersClick({ commentId: commentData._id })} className="absolute -bottom-2 -right-3 flex items-center bg-white rounded-full p-[2px] shadow-sm px-1.5 cursor-pointer z-10 border border-gray-100">
+                                <div className="z-20 text-blue-500 bg-white rounded-full flex items-center justify-center">
+                                    <FaThumbsUp className="text-[10px] m-[2px]" />
+                                </div>
+                                <span className="text-[11px] text-gray-600 ml-1 font-medium pr-0.5">{commentData.likes.length}</span>
+                            </div>
+                        )}
                     </div>
-                    <div className="flex items-center gap-4 px-2 mt-1 text-xs text-gray-500">
-                        <button
-                            onClick={handleCommentLikeToggle}
-                            className={`font-semibold ${isLikedByCurrentUser ? 'text-blue-600' : 'hover:underline'}`}
-                        >
-                            Like
-                        </button>
-                        <button
-                            onClick={() => onLikersClick({ commentId: commentData._id })}
-                            className="hover:underline"
-                        >
-                            {commentData.likes?.length > 0 && `${commentData.likes.length} Likes`}
-                        </button>
-                        <button
-                            onClick={() => setIsReplying(prev => !prev)}
-                            className="font-semibold hover:underline"
-                        >
-                            Reply
-                        </button>
-                        <span>{formatDistanceToNow(new Date(commentData.createdAt), { addSuffix: true })}</span>
+
+                    {/* Action Links (Share Removed) */}
+                    <div className="flex items-center gap-1.5 ml-3 mt-1 text-[12px] font-bold text-gray-600">
+                        <button onClick={handleCommentLikeToggle} className={`hover:underline ${isLikedByCurrentUser ? 'text-blue-600' : ''}`}>Like</button>
+                        <span>.</span>
+                        <button onClick={() => setIsReplying(!isReplying)} className="hover:underline">Reply</button>
+                        <span className="font-normal text-gray-500 ml-0.5">. {timeAgo}</span>
                     </div>
                 </div>
             </div>
 
-            {/* ── Replies list ── */}
-            {commentData.replies?.map(reply => (
-                <Reply
-                    key={reply._id}
-                    postId={postId}
-                    commentId={commentData._id}
-                    replyData={reply}
-                    onReplyUpdated={handleReplyUpdated}
-                    onLikersClick={ids => onLikersClick({ ...ids, commentId: commentData._id })}
-                />
-            ))}
+            <div className="ml-11 mt-2 space-y-2">
+                {commentData.replies?.map(reply => (
+                    <Reply key={reply._id} postId={postId} commentId={commentData._id} replyData={reply} onReplyUpdated={handleReplyUpdated} onLikersClick={ids => onLikersClick({ ...ids, commentId: commentData._id })} />
+                ))}
+            </div>
 
-            {/* ── Reply input ── */}
             {isReplying && (
-                <form onSubmit={handleAddReply} className="flex items-center space-x-3 ml-12">
-                    <img
-                        src={user?.profilePicture || '/images/profile.png'}
-                        alt="Your avatar"
-                        className="w-8 h-8 rounded-full"
-                    />
-                    <input
-                        type="text"
-                        value={replyContent}
-                        onChange={e => setReplyContent(e.target.value)}
-                        placeholder="Write a reply..."
-                        className="w-full p-2 text-sm bg-gray-100 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                        type="submit"
-                        disabled={!replyContent.trim()}
-                        className="p-2 text-white bg-blue-600 rounded-full hover:bg-blue-700 disabled:bg-blue-300"
-                    >
-                        <FiSend size={16} />
-                    </button>
+                <form onSubmit={handleAddReply} className="flex items-center w-full bg-[#f0f2f5] rounded-full px-2 py-1.5 mt-2 ml-10 max-w-[calc(100%-2.5rem)]">
+                    <img src={user?.profilePicture || '/profile.png'} alt="Your avatar" className="w-6 h-6 rounded-full object-cover mr-2" />
+                    <input type="text" value={replyContent} onChange={e => setReplyContent(e.target.value)} placeholder="Write a reply..." className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-[14px] placeholder-gray-500" />
+                    <div className="flex items-center gap-2 pr-1 text-gray-400">
+                        <button type="button" className="hover:text-gray-600"><FiMic size={16} /></button>
+                        <button type="button" className="hover:text-gray-600"><FiImage size={16} /></button>
+                        {replyContent.trim() && <button type="submit" className="text-blue-600"><FiSend size={16} /></button>}
+                    </div>
                 </form>
             )}
         </div>
