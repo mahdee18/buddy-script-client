@@ -1,11 +1,8 @@
-import { createContext, useState, useEffect, useContext, useMemo } from 'react'; // 1. Import useMemo
+import React, { createContext, useState, useEffect, useMemo } from 'react'; 
 import { registerUser, loginUser, getMe } from '../api/auth';
 import ClipLoader from "react-spinners/ClipLoader";
 
 export const AuthContext = createContext();
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('authToken'));
@@ -21,7 +18,7 @@ export const AuthProvider = ({ children }) => {
           setUser(userData);
           setToken(storedToken);
         } catch (error) {
-          console.error("Token validation failed, logging out.", error);
+          console.error("Token validation failed, logging out.");
           localStorage.removeItem('authToken');
           setToken(null);
           setUser(null);
@@ -55,7 +52,6 @@ export const AuthProvider = ({ children }) => {
       setUser(userDataWithoutToken);
       return data;
     } catch (error) {
-        console.error("Error inside loginAction:", error);
         throw error;
     }
   };
@@ -64,9 +60,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('authToken');
     setToken(null);
     setUser(null);
-     };
+  };
 
- 
   const authContextValue = useMemo(
     () => ({
       token,
@@ -81,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <div className="flex items-center justify-center h-screen">
         <ClipLoader color={"#3b82f6"} size={50} />
       </div>
     );
